@@ -129,6 +129,8 @@ const CString EFFECT_TEXTS[] = {		// // //
 	_T("I0x - SID filter cutoff, high byte"),
 	_T("Jxx - SID filter cutoff, low byte"),
 	_T("H0x - SID filter mode"),
+	_T("Exy - SID envelope"),
+	_T("Y0x - SID test/ring/sync/gate"),
 };
 
 // OLE copy and mix
@@ -1592,11 +1594,16 @@ bool CFamiTrackerView::PlayerGetNote(int Track, int Frame, int Channel, int Row,
 	else {
 		// These effects will pass even if the channel is muted
 		const int PASS_EFFECTS[] = {EF_HALT, EF_JUMP, EF_SPEED, EF_SKIP, EF_GROOVE,
-			EF_SID_FILTER_CUTOFF_HI,  EF_SID_FILTER_CUTOFF_LO, EF_SID_FILTER_RESONANCE, EF_SID_FILTER_MODE};		// // //
+			EF_SID_FILTER_CUTOFF_HI,  EF_SID_FILTER_CUTOFF_LO, EF_SID_FILTER_RESONANCE, EF_SID_FILTER_MODE,
+			EF_SUNSOFT_ENV_TYPE, EF_SUNSOFT_NOISE, EF_SUNSOFT_ENV_HI, EF_SUNSOFT_ENV_LO};		// // //
 		int Columns = pDoc->GetEffColumns(Track, Channel) + 1;
 		
-		NoteData.Note		= HALT;
-		NoteData.Octave		= 0;
+		if (Channel >= pDoc->GetChannelIndex(CHANID_SAA1099_CH1) && Channel <= pDoc->GetChannelIndex(CHANID_SAA1099_CH6))
+			NoteData.Vol = 0;
+		else {
+			NoteData.Note = HALT;
+			NoteData.Octave = 0;
+		}
 		NoteData.Instrument = 0;
 
 		for (int j = 0; j < Columns; ++j) {
@@ -2070,7 +2077,7 @@ void CFamiTrackerView::InsertNote(int Note, int Octave, int Channel, int Velocit
 	if (Note != HALT && Note != RELEASE) {
 		Cell.Octave	= Octave;
 
-		if (!m_bMaskInstrument && Cell.Instrument != HOLD_INSTRUMENT)		// // // 050B
+		if (!m_bMaskInstrument && Cell.Instrument != HOLD_INSTRUMENT && Cell.Instrument != CUT_INSTRUMENT && Cell.Instrument != RELEASE_INSTRUMENT)		// // // 050B
 			Cell.Instrument = GetInstrument();
 
 		if (!m_bMaskVolume) {
@@ -2798,8 +2805,20 @@ bool CFamiTrackerView::EditInstrumentColumn(stChanNote &Note, Keycode Key, bool 
 			StepDown = true;
 		return true;
 	}
-	else if (Key == 'H') {		// // // 050B
+	else if (Key == 'H' || Key == '&') {		// // // 050B
 		SetInstrument(Note.Instrument = HOLD_INSTRUMENT);
+		if (EditStyle != EDIT_STYLE_MPT)
+			StepDown = true;
+		return true;
+	}
+	else if (CheckHaltKey(Key)) {		// // // 050B
+		SetInstrument(Note.Instrument = CUT_INSTRUMENT);
+		if (EditStyle != EDIT_STYLE_MPT)
+			StepDown = true;
+		return true;
+	}
+	else if (CheckReleaseKey(Key)) {		// // // 050B
+		SetInstrument(Note.Instrument = RELEASE_INSTRUMENT);
 		if (EditStyle != EDIT_STYLE_MPT)
 			StepDown = true;
 		return true;
@@ -2822,7 +2841,7 @@ bool CFamiTrackerView::EditInstrumentColumn(stChanNote &Note, Keycode Key, bool 
 		Shift = 0;
 	}
 
-	if (Note.Instrument == MAX_INSTRUMENTS || Note.Instrument == HOLD_INSTRUMENT)		// // // 050B
+	if (Note.Instrument == MAX_INSTRUMENTS || Note.Instrument == HOLD_INSTRUMENT || Note.Instrument == CUT_INSTRUMENT || Note.Instrument == RELEASE_INSTRUMENT)		// // // 050B
 		Note.Instrument = 0;
 
 	switch (EditStyle) {

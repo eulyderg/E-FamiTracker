@@ -66,6 +66,13 @@ void CInstrumentEditorSID::SelectInstrument(std::shared_ptr<CInstrument> pInst)
 	static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_PWM_START_SPIN))->SetRange(0, 4095);
 	static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_PWM_END_SPIN))->SetRange(0, 4095);
 
+	static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_START))->SetRange(0, 4095);
+	static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_END))->SetRange(0, 4095);
+	static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_SPEED))->SetRange(0, 255);
+
+	static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_FILTER_START_SPIN))->SetRange(0, 4095);
+	static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_FILTER_END_SPIN))->SetRange(0, 4095);
+
 	static_cast<CSliderCtrl*>(GetDlgItem(IDC_SLIDER_ATTACK))->SetPos(15-m_pInstrument->GetEnvParam(ENV_ATTACK));
 	static_cast<CSliderCtrl*>(GetDlgItem(IDC_SLIDER_DECAY))->SetPos(15-m_pInstrument->GetEnvParam(ENV_DECAY));
 	static_cast<CSliderCtrl*>(GetDlgItem(IDC_SLIDER_SUSTAIN))->SetPos(15-m_pInstrument->GetEnvParam(ENV_SUSTAIN));
@@ -78,6 +85,13 @@ void CInstrumentEditorSID::SelectInstrument(std::shared_ptr<CInstrument> pInst)
 	static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_PWM_START_SPIN))->SetPos(m_pInstrument->GetPWMStart());
 	static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_PWM_END_SPIN))->SetPos(m_pInstrument->GetPWMEnd());
 
+	static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_START))->SetPos(m_pInstrument->GetFilterStart());
+	static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_END))->SetPos(m_pInstrument->GetFilterEnd());
+	static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_SPEED))->SetPos(255 - m_pInstrument->GetFilterSpeed());
+
+	static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_FILTER_START_SPIN))->SetPos(m_pInstrument->GetFilterStart());
+	static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_FILTER_END_SPIN))->SetPos(m_pInstrument->GetFilterEnd());
+
 
 	int mode = m_pInstrument->GetPWMMode();
 	switch (mode) {
@@ -87,11 +101,22 @@ void CInstrumentEditorSID::SelectInstrument(std::shared_ptr<CInstrument> pInst)
 	case PWM_ONCE: CheckRadioButton(IDC_PWM_MODE1, IDC_DISABLE_PWM, IDC_PWM_MODE3); EnablePWM(); break;
 	case PWM_SUSTAIN: CheckRadioButton(IDC_PWM_MODE1, IDC_DISABLE_PWM, IDC_PWM_MODE4); EnablePWM(false); break;
 	}
+	mode = m_pInstrument->GetFilterMode();
+	switch (mode) {
+	case PWM_DISABLED: CheckRadioButton(IDC_FILTER_MODE1, IDC_DISABLE_FILTER, IDC_DISABLE_FILTER); EnableFilter(false); break;
+	case PWM_LOOP: CheckRadioButton(IDC_FILTER_MODE1, IDC_DISABLE_FILTER, IDC_FILTER_MODE1); EnableFilter(); break;
+	case PWM_PINGPONG: CheckRadioButton(IDC_FILTER_MODE1, IDC_DISABLE_FILTER, IDC_FILTER_MODE2); EnableFilter(); break;
+	case PWM_ONCE: CheckRadioButton(IDC_FILTER_MODE1, IDC_DISABLE_FILTER, IDC_FILTER_MODE3); EnableFilter(); break;
+	case PWM_SUSTAIN: CheckRadioButton(IDC_FILTER_MODE1, IDC_DISABLE_FILTER, IDC_FILTER_MODE4); EnableFilter(false); break;
+	}
 
 	CString ratetext = _T("Rate: ");
 	ratetext.AppendFormat(_T("%d"), 255 - static_cast<CSliderCtrl*>(GetDlgItem(IDC_PWM_SPEED))->GetPos());
 	static_cast<CStatic*>(GetDlgItem(IDC_TEXT_RATE))->SetWindowTextA(ratetext);
-	
+
+	ratetext = _T("Rate: ");
+	ratetext.AppendFormat(_T("%d"), 255 - static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_SPEED))->GetPos());
+	static_cast<CStatic*>(GetDlgItem(IDC_TEXT_RATE2))->SetWindowTextA(ratetext);
 
 
 }
@@ -107,6 +132,13 @@ BEGIN_MESSAGE_MAP(CInstrumentEditorSID, CInstrumentEditPanel)
 	ON_BN_CLICKED(IDC_PWM_MODE2, OnPWMPingPongClicked)
 	ON_BN_CLICKED(IDC_PWM_MODE3, OnPWMOnceClicked)
 	ON_BN_CLICKED(IDC_PWM_MODE4, OnPWMSustainClicked)
+	ON_EN_CHANGE(IDC_BOX_FILTER_START, OnFilterStartSpinChange)
+	ON_EN_CHANGE(IDC_BOX_FILTER_END, OnFilterEndSpinChange)
+	ON_BN_CLICKED(IDC_DISABLE_FILTER, OnFilterDisableClicked)
+	ON_BN_CLICKED(IDC_FILTER_MODE1, OnFilterLoopClicked)
+	ON_BN_CLICKED(IDC_FILTER_MODE2, OnFilterPingPongClicked)
+	ON_BN_CLICKED(IDC_FILTER_MODE3, OnFilterOnceClicked)
+	ON_BN_CLICKED(IDC_FILTER_MODE4, OnFilterSustainClicked)
 END_MESSAGE_MAP()
 
 // CInstrumentEditorSID message handlers
@@ -132,6 +164,17 @@ void CInstrumentEditorSID::EnablePWM(bool Enabled)
 	static_cast<CSliderCtrl*>(GetDlgItem(IDC_PWM_SPEED))->EnableWindow(Enabled);
 }
 
+void CInstrumentEditorSID::EnableFilter(bool Enabled)
+{
+	static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_FILTER_START_SPIN))->EnableWindow(Enabled);
+	static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_FILTER_END_SPIN))->EnableWindow(Enabled);
+	static_cast<CEdit*>(GetDlgItem(IDC_BOX_FILTER_START))->EnableWindow(Enabled);
+	static_cast<CEdit*>(GetDlgItem(IDC_BOX_FILTER_END))->EnableWindow(Enabled);
+	static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_START))->EnableWindow(Enabled);
+	static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_END))->EnableWindow(Enabled);
+	static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_SPEED))->EnableWindow(Enabled);
+}
+
 
 
 void CInstrumentEditorSID::OnPWMStartSpinChange()
@@ -148,31 +191,33 @@ void CInstrumentEditorSID::OnPWMEndSpinChange()
 	if (m_pInstrument)
 		m_pInstrument->SetPWMEnd(pos);
 }
-void CInstrumentEditorSID::OnPWMDisableClicked()
+void CInstrumentEditorSID::OnPWMDisableClicked() { EnablePWM(false); m_pInstrument->SetPWMMode(PWM_DISABLED); }
+void CInstrumentEditorSID::OnPWMLoopClicked() { EnablePWM(); m_pInstrument->SetPWMMode(PWM_LOOP); }
+void CInstrumentEditorSID::OnPWMPingPongClicked() { EnablePWM(); m_pInstrument->SetPWMMode(PWM_PINGPONG); }
+void CInstrumentEditorSID::OnPWMOnceClicked() { EnablePWM(); m_pInstrument->SetPWMMode(PWM_ONCE); }
+void CInstrumentEditorSID::OnPWMSustainClicked() { EnablePWM(false); m_pInstrument->SetPWMMode(PWM_SUSTAIN); }
+
+
+void CInstrumentEditorSID::OnFilterStartSpinChange()
 {
-	EnablePWM(false);
-	m_pInstrument->SetPWMMode(PWM_DISABLED);
+	int pos = static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_FILTER_START_SPIN))->GetPos();
+	static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_START))->SetPos(pos);
+	if (m_pInstrument)
+		m_pInstrument->SetFilterStart(pos);
 }
-void CInstrumentEditorSID::OnPWMLoopClicked()
+void CInstrumentEditorSID::OnFilterEndSpinChange()
 {
-	EnablePWM();
-	m_pInstrument->SetPWMMode(PWM_LOOP);
+	int pos = static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_FILTER_END_SPIN))->GetPos();
+	static_cast<CSliderCtrl*>(GetDlgItem(IDC_FILTER_END))->SetPos(pos);
+	if (m_pInstrument)
+		m_pInstrument->SetFilterEnd(pos);
 }
-void CInstrumentEditorSID::OnPWMPingPongClicked()
-{
-	EnablePWM();
-	m_pInstrument->SetPWMMode(PWM_PINGPONG);
-}
-void CInstrumentEditorSID::OnPWMOnceClicked()
-{
-	EnablePWM();
-	m_pInstrument->SetPWMMode(PWM_ONCE);
-}
-void CInstrumentEditorSID::OnPWMSustainClicked()
-{
-	EnablePWM(false);
-	m_pInstrument->SetPWMMode(PWM_SUSTAIN);
-}
+void CInstrumentEditorSID::OnFilterDisableClicked() { EnableFilter(false); m_pInstrument->SetFilterMode(PWM_DISABLED); }
+void CInstrumentEditorSID::OnFilterLoopClicked() { EnableFilter(); m_pInstrument->SetFilterMode(PWM_LOOP); }
+void CInstrumentEditorSID::OnFilterPingPongClicked() { EnableFilter(); m_pInstrument->SetFilterMode(PWM_PINGPONG); }
+void CInstrumentEditorSID::OnFilterOnceClicked() { EnableFilter(); m_pInstrument->SetFilterMode(PWM_ONCE); }
+void CInstrumentEditorSID::OnFilterSustainClicked() { EnableFilter(false); m_pInstrument->SetFilterMode(PWM_SUSTAIN); }
+
 
 
 void CInstrumentEditorSID::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
@@ -193,6 +238,12 @@ void CInstrumentEditorSID::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrol
 		static_cast<CStatic*>(GetDlgItem(IDC_TEXT_RATE))->SetWindowTextA(ratetext);
 		m_pInstrument->SetPWMSpeed(255 - pos);
 	}
+	else if (pSlider->GetDlgCtrlID() == IDC_FILTER_SPEED) {
+		CString ratetext = _T("Rate: ");
+		ratetext.AppendFormat(_T("%d"), 255 - pos);
+		static_cast<CStatic*>(GetDlgItem(IDC_TEXT_RATE2))->SetWindowTextA(ratetext);
+		m_pInstrument->SetFilterSpeed(255 - pos);
+	}
 
 	CInstrumentEditPanel::OnVScroll(nSBCode, nPos, pScrollBar);
 }
@@ -209,5 +260,13 @@ void CInstrumentEditorSID::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrol
 	else if (pSlider->GetDlgCtrlID() == IDC_PWM_END) {
 		m_pInstrument->SetPWMEnd(pos);
 		static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_PWM_END_SPIN))->SetPos(pos);
+	}
+	else if (pSlider->GetDlgCtrlID() == IDC_FILTER_START) {
+		m_pInstrument->SetFilterStart(pos);
+		static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_FILTER_START_SPIN))->SetPos(pos);
+	}
+	else if (pSlider->GetDlgCtrlID() == IDC_FILTER_END) {
+		m_pInstrument->SetFilterEnd(pos);
+		static_cast<CSpinButtonCtrl*>(GetDlgItem(IDC_FILTER_END_SPIN))->SetPos(pos);
 	}
 }

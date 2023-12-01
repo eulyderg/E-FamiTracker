@@ -544,8 +544,8 @@ bool CMainFrame::CreateToolbars()
 
 bool CMainFrame::CreateDialogPanels()
 {
-	//CDialogBar
 
+	//CDialogBar
 	// Top area
 	if (!m_wndControlBar.Create(this, IDD_MAINBAR, CBRS_TOP | CBRS_TOOLTIPS | CBRS_FLYBY, IDD_MAINBAR)) {
 		TRACE("Failed to create frame main bar\n");
@@ -821,6 +821,7 @@ void CMainFrame::ResizeFrameWindow()
 void CMainFrame::SetupColors()
 {
 	ASSERT(m_pInstrumentList != NULL);
+
 
 	// Instrument list colors
 	m_pInstrumentList->SetBkColor(theApp.GetSettings()->Appearance.iColBackground);
@@ -2179,7 +2180,8 @@ BOOL CMainFrame::DestroyWindow()
 
 BOOL CMainFrame::OnEraseBkgnd(CDC* pDC)
 {
-	return FALSE;
+	pDC->FillSolidRect(0, 0, theApp.GetSettings()->WindowPos.iRight, theApp.GetSettings()->WindowPos.iBottom, RGB(0x10, 0x10, 0x10));
+	return TRUE;
 }
 
 void CMainFrame::OnTrackerSwitchToInstrument()

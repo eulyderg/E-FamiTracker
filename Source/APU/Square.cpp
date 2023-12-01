@@ -141,7 +141,8 @@ void CSquare::Process(uint32_t Time)
 		m_iTime		+= m_iCounter;
 		m_iCounter	 = m_iPeriod + 1;
 		uint8_t Volume = m_iEnvelopeFix ? m_iFixedVolume : m_iEnvelopeVolume;
-		Mix(Valid && DUTY_TABLE[m_iDutyLength][m_iDutyCycle] ? Volume : 0);
+		m_iValue = Valid && DUTY_TABLE[m_iDutyLength][m_iDutyCycle] ? Volume * 6 : 0;
+		//Mix(Valid && DUTY_TABLE[m_iDutyLength][m_iDutyCycle] ? Volume * 6 : 0);
 		m_iDutyCycle = (m_iDutyCycle + 1) & 0x0F;
 	}
 

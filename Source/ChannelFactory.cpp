@@ -68,6 +68,7 @@ CChannelFactory::CChannelFactory() : CFactory()
 	Func = MakeCtor<CChannelHandlerMMC5>();
 	m_pMakeFunc[CHANID_MMC5_SQUARE1] = Func;
 	m_pMakeFunc[CHANID_MMC5_SQUARE2] = Func;
+	AddProduct<CChannelHandlerMMC5Voice>(CHANID_MMC5_VOICE);
 	
 	Func = MakeCtor<CChannelHandlerN163>();
 	m_pMakeFunc[CHANID_N163_CH1] = Func;

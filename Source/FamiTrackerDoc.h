@@ -374,6 +374,7 @@ private:
 	bool			WriteBlock_SequencesVRC6(CDocumentFile *pDocFile, const int Version) const;
 	bool			WriteBlock_SequencesN163(CDocumentFile *pDocFile, const int Version) const;
 	bool			WriteBlock_SequencesS5B(CDocumentFile *pDocFile, const int Version) const;
+	bool			WriteBlock_SequencesSID(CDocumentFile* pDocFile, const int Version) const;
 	// // //
 	bool			WriteBlock_ParamsExtra(CDocumentFile *pDocFile, const int Version) const;
 	bool			WriteBlock_DetuneTables(CDocumentFile *pDocFile, const int Version) const;
@@ -394,6 +395,7 @@ private:
 	void			ReadBlock_SequencesVRC6(CDocumentFile *pDocFile, const int Version);
 	void			ReadBlock_SequencesN163(CDocumentFile *pDocFile, const int Version);
 	void			ReadBlock_SequencesS5B(CDocumentFile *pDocFile, const int Version);
+	void			ReadBlock_SequencesSID(CDocumentFile* pDocFile, const int Version);
 	// // //
 	void			ReadBlock_ParamsExtra(CDocumentFile *pDocFile, const int Version);
 	void			ReadBlock_DetuneTables(CDocumentFile *pDocFile, const int Version);

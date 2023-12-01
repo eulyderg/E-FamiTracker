@@ -200,12 +200,12 @@ bool CTrackerChannel::IsEffectCompatible(effect_t EffNumber, int EffParam) const
 			return m_iChannelID == CHANID_SQUARE1 || m_iChannelID == CHANID_SQUARE2 || m_iChannelID == CHANID_5E01_SQUARE1 || m_iChannelID == CHANID_5E01_SQUARE2;
 		case EF_DAC: case EF_SAMPLE_OFFSET: case EF_RETRIGGER: case EF_DPCM_PITCH: {
 			// TODO move to virtual method of Effect subclasses.
-			if (m_iChannelID != CHANID_DPCM || m_iChannelID != CHANID_5E01_DPCM) return false;
+			if (m_iChannelID != CHANID_DPCM && m_iChannelID != CHANID_5E01_DPCM && m_iChannelID != CHANID_MMC5_VOICE) return false;
 
 			int limit;
 			switch (EffNumber) {
 				case EF_DAC:
-					limit = 0x7f; break;
+					if (m_iChannelID == CHANID_MMC5_VOICE) limit = 0xff; else limit = 0x7f; break;
 				case EF_SAMPLE_OFFSET:
 					limit = 0x3f; break;
 				case EF_DPCM_PITCH:
@@ -251,6 +251,10 @@ bool CTrackerChannel::IsEffectCompatible(effect_t EffNumber, int EffParam) const
 			return (m_iChip == SNDCHIP_6581 && EffParam <= 0x0F);
 	  case EF_SID_FILTER_CUTOFF_LO:
 			return m_iChip == SNDCHIP_6581;
+		case EF_SID_ENVELOPE:
+			return (m_iChip == SNDCHIP_6581 && EffParam <= 0x3F);
+		case EF_SID_RING:
+			return (m_iChip == SNDCHIP_6581 && EffParam <= 0x0F);
 		case EF_N163_WAVE_BUFFER:
 			return m_iChip == SNDCHIP_N163 && EffParam <= 0x7F;
 		case EF_FDS_VOLUME:
@@ -258,7 +262,7 @@ bool CTrackerChannel::IsEffectCompatible(effect_t EffNumber, int EffParam) const
 		case EF_VRC7_PORT: case EF_VRC7_WRITE:		// // // 050B
 			return m_iChip == SNDCHIP_VRC7;
 		case EF_PHASE_RESET:
-			return m_iChip == SNDCHIP_VRC6 && EffParam == 0x00;
+			return (m_iChip == SNDCHIP_VRC6 || m_iChip == SNDCHIP_N163) && EffParam == 0x00;
 		case EF_HARMONIC:
 			// VRC7 is not supported yet.
 			if (m_iChip == SNDCHIP_VRC7) return false;

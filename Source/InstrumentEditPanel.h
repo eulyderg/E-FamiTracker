@@ -98,7 +98,7 @@ protected:
 
 protected:
 	// Setup default sequence dialog
-	void SetupDialog(LPCTSTR *pListItems);
+	void SetupDialog(LPCTSTR *pListItems, int pSequenceCount);
 	
 	// Virtual methods
 	virtual void SetupParser() const = 0;		// // //

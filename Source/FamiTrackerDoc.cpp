@@ -59,6 +59,7 @@
 #include "InstrumentVRC6.h"		// // // for error messages only
 #include "InstrumentN163.h"		// // // for error messages only
 #include "InstrumentS5B.h"		// // // for error messages only
+#include "InstrumentSID.h"		// // // for error messages only
 #include "FamiTrackerDoc.h"
 #include "ModuleException.h"		// // //
 #include "TrackerChannel.h"
@@ -109,6 +110,9 @@ static const char *FILE_BLOCK_SEQUENCES_N106 = "SEQUENCES_N106";
 
 // Sunsoft
 static const char *FILE_BLOCK_SEQUENCES_S5B = "SEQUENCES_S5B";
+
+
+static const char* FILE_BLOCK_SEQUENCES_SID = "SEQUENCES_SID";
 
 // // // 0CC-FamiTracker specific
 const char *FILE_BLOCK_DETUNETABLES			= "DETUNETABLES";
@@ -737,7 +741,7 @@ bool CFamiTrackerDoc::WriteBlocks(CDocumentFile *pDocFile) const
 #else
 		7, 1, 3, 6, 6, 3, 4, 1, 1,
 #endif
-		6, 1, 1,					// expansion
+		6, 1, 1, 4,					// expansion
 		3, 1, 1, 1,					// 0cc-ft
 		1							// json
 	};
@@ -755,6 +759,7 @@ bool CFamiTrackerDoc::WriteBlocks(CDocumentFile *pDocFile) const
 		&CFamiTrackerDoc::WriteBlock_SequencesVRC6,		// // //
 		&CFamiTrackerDoc::WriteBlock_SequencesN163,
 		&CFamiTrackerDoc::WriteBlock_SequencesS5B,
+		&CFamiTrackerDoc::WriteBlock_SequencesSID,
 		&CFamiTrackerDoc::WriteBlock_ParamsExtra,		// // //
 		&CFamiTrackerDoc::WriteBlock_DetuneTables,		// // //
 		&CFamiTrackerDoc::WriteBlock_Grooves,			// // //
@@ -1110,6 +1115,57 @@ bool CFamiTrackerDoc::WriteBlock_SequencesS5B(CDocumentFile *pDocFile, const int
 
 			if (Count > 0) {
 				const CSequence *pSeq = GetSequence(INST_S5B, i, j);
+
+				// Store index
+				pDocFile->WriteBlockInt(i);
+				// Store type of sequence
+				pDocFile->WriteBlockInt(j);
+				// Store number of items in this sequence
+				pDocFile->WriteBlockChar(Count);
+				// Store loop point
+				pDocFile->WriteBlockInt(pSeq->GetLoopPoint());
+				// Store release point
+				pDocFile->WriteBlockInt(pSeq->GetReleasePoint());
+				// Store setting
+				pDocFile->WriteBlockInt(pSeq->GetSetting());
+				// Store items
+				for (int k = 0; k < Count; ++k) {
+					pDocFile->WriteBlockChar(pSeq->GetItem(k));
+				}
+			}
+		}
+	}
+
+	return pDocFile->FlushBlock();
+}
+
+bool CFamiTrackerDoc::WriteBlock_SequencesSID(CDocumentFile* pDocFile, const int Version) const
+{
+	/*
+	 * Store SID sequences
+	 */
+
+	int Count = 0;
+
+	// Count number of used sequences
+	for (int i = 0; i < MAX_SEQUENCES; ++i)
+		for (int j = 0; j < SEQ_COUNT; ++j)
+			if (GetSequenceItemCount(INST_SID, i, j) > 0)
+				Count++;
+
+	if (!Count) return true;		// // //
+	// Sequences, version 0
+	pDocFile->CreateBlock(FILE_BLOCK_SEQUENCES_SID, Version);
+
+	// Write it
+	pDocFile->WriteBlockInt(Count);
+
+	for (int i = 0; i < MAX_SEQUENCES; ++i) {
+		for (int j = 0; j < SEQ_COUNT; ++j) {
+			Count = GetSequenceItemCount(INST_SID, i, j);
+
+			if (Count > 0) {
+				const CSequence* pSeq = GetSequence(INST_SID, i, j);
 
 				// Store index
 				pDocFile->WriteBlockInt(i);
@@ -1572,6 +1628,7 @@ BOOL CFamiTrackerDoc::OpenDocumentNew(CDocumentFile &DocumentFile)
 	FTM_READ_FUNC[FILE_BLOCK_SEQUENCES_N163]	= &CFamiTrackerDoc::ReadBlock_SequencesN163;
 	FTM_READ_FUNC[FILE_BLOCK_SEQUENCES_N106]	= &CFamiTrackerDoc::ReadBlock_SequencesN163;	// Backward compatibility
 	FTM_READ_FUNC[FILE_BLOCK_SEQUENCES_S5B]		= &CFamiTrackerDoc::ReadBlock_SequencesS5B;		// // //
+	FTM_READ_FUNC[FILE_BLOCK_SEQUENCES_SID]   = &CFamiTrackerDoc::ReadBlock_SequencesSID;		// // //
 	FTM_READ_FUNC[FILE_BLOCK_DETUNETABLES]		= &CFamiTrackerDoc::ReadBlock_DetuneTables;		// // //
 	FTM_READ_FUNC[FILE_BLOCK_GROOVES]			= &CFamiTrackerDoc::ReadBlock_Grooves;			// // //
 	FTM_READ_FUNC[FILE_BLOCK_BOOKMARKS]			= &CFamiTrackerDoc::ReadBlock_Bookmarks;		// // //
@@ -2129,6 +2186,42 @@ void CFamiTrackerDoc::ReadBlock_SequencesS5B(CDocumentFile *pDocFile, const int 
 	}
 }
 
+void CFamiTrackerDoc::ReadBlock_SequencesSID(CDocumentFile* pDocFile, const int Version)
+{
+	unsigned int Count = AssertRange(pDocFile->GetBlockInt(), 0, MAX_SEQUENCES * SEQ_COUNT, "SID sequence count");
+	AssertRange<MODULE_ERROR_OFFICIAL>(Count, 0U, static_cast<unsigned>(MAX_SEQUENCES * SEQ_COUNT - 1), "SID sequence count");		// // //
+
+	CSequenceManager* pManager = GetSequenceManager(INST_SID);		// // //
+
+	for (unsigned int i = 0; i < Count; i++) {
+		unsigned int  Index = AssertRange(pDocFile->GetBlockInt(), 0, MAX_SEQUENCES - 1, "Sequence index");
+		unsigned int  Type = AssertRange(pDocFile->GetBlockInt(), 0, SEQ_COUNT - 1, "Sequence type");
+		try {
+			unsigned char SeqCount = pDocFile->GetBlockChar();
+			CSequence* pSeq = pManager->GetCollection(Type)->GetSequence(Index);
+			pSeq->Clear();
+			pSeq->SetItemCount(SeqCount < MAX_SEQUENCE_ITEMS ? SeqCount : MAX_SEQUENCE_ITEMS);
+
+			pSeq->SetLoopPoint(AssertRange<MODULE_ERROR_STRICT>(
+				pDocFile->GetBlockInt(), -1, static_cast<int>(SeqCount) - 1, "Sequence loop point"));
+			pSeq->SetReleasePoint(AssertRange<MODULE_ERROR_STRICT>(
+				pDocFile->GetBlockInt(), -1, static_cast<int>(SeqCount) - 1, "Sequence release point"));
+			pSeq->SetSetting(static_cast<seq_setting_t>(pDocFile->GetBlockInt()));		// // //
+
+			// AssertRange(SeqCount, 0, MAX_SEQUENCE_ITEMS, "Sequence item count");
+			for (int j = 0; j < SeqCount; ++j) {
+				char Value = pDocFile->GetBlockChar();
+				if (j < MAX_SEQUENCE_ITEMS)		// // //
+					pSeq->SetItem(j, Value);
+			}
+		}
+		catch (CModuleException* e) {
+			e->AppendError("At SID %s sequence %d,", CInstrumentSID::SEQUENCE_NAME[Type], Index);
+			throw;
+		}
+	}
+}
+
 void CFamiTrackerDoc::ReadBlock_Frames(CDocumentFile *pDocFile, const int Version)
 {
 	if (Version == 1) {
@@ -2224,7 +2317,7 @@ void CFamiTrackerDoc::ReadBlock_Patterns(CDocumentFile *pDocFile, const int Vers
 				Note->Octave = AssertRange<MODULE_ERROR_STRICT>(
 					pDocFile->GetBlockChar(), 0, OCTAVE_RANGE - 1, "Octave value");
 				int Inst = static_cast<unsigned char>(pDocFile->GetBlockChar());
-				if (Inst != HOLD_INSTRUMENT)		// // // 050B
+				if (Inst != HOLD_INSTRUMENT && Inst != CUT_INSTRUMENT && Inst != RELEASE_INSTRUMENT)		// // // 050B
 					AssertRange<MODULE_ERROR_STRICT>(Inst, 0, m_pInstrumentManager->MAX_INSTRUMENTS, "Instrument index");
 				Note->Instrument = Inst;
 				Note->Vol = AssertRange<MODULE_ERROR_STRICT>(
@@ -4954,7 +5047,7 @@ stFullState *CFamiTrackerDoc::RetrieveSoundState(unsigned int Track, unsigned in
 				BufferPos[c] = 0;
 
 			if (State->Instrument == MAX_INSTRUMENTS)
-				if (Note.Instrument != MAX_INSTRUMENTS && Note.Instrument != HOLD_INSTRUMENT)		// // // 050B
+				if (Note.Instrument != MAX_INSTRUMENTS && Note.Instrument != HOLD_INSTRUMENT && Note.Instrument != CUT_INSTRUMENT && Note.Instrument != RELEASE_INSTRUMENT)		// // // 050B
 					State->Instrument = Note.Instrument;
 
 			if (State->Volume == MAX_VOLUME)
@@ -5042,6 +5135,8 @@ stFullState *CFamiTrackerDoc::RetrieveSoundState(unsigned int Track, unsigned in
 				case EF_VRC7_PORT:
 				case EF_SAA_NOISE_MODE:
 				case EF_SID_FILTER_RESONANCE: case EF_SID_FILTER_CUTOFF_HI: case EF_SID_FILTER_CUTOFF_LO: case EF_SID_FILTER_MODE:
+				case EF_SID_ENVELOPE:
+				case EF_SID_RING:
 					if (!ch->IsEffectCompatible(fx, xy)) continue;
 				case EF_DUTY_CYCLE:
 					if (ch->GetChip() == SNDCHIP_VRC7) continue;		// // // 050B

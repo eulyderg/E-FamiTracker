@@ -88,6 +88,9 @@ bool CChannelHandlerN163::HandleEffect(effect_t EffNum, unsigned char EffParam)
 		if (auto pHandler = dynamic_cast<CSeqInstHandlerN163*>(m_pInstHandler.get()))
 			pHandler->RequestWaveUpdate();
 		break;
+	case EF_PHASE_RESET:
+		m_bResetPhase = true;
+		break;
 	default: return FrequencyChannelHandler::HandleEffect(EffNum, EffParam);
 	}
 

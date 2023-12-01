@@ -73,7 +73,7 @@ void CChannelHandlerVRC7::HandleNoteData(stChanNote *pNoteData, int EffColumns)
 {
 	FrequencyChannelHandler::HandleNoteData(pNoteData, EffColumns);		// // //
 
-	if (m_iCommand == CMD_NOTE_TRIGGER && pNoteData->Instrument == HOLD_INSTRUMENT)		// // // 050B
+	if (m_iCommand == CMD_NOTE_TRIGGER && (pNoteData->Instrument == HOLD_INSTRUMENT))		// // // 050B
 		m_iCommand = CMD_NOTE_ON;
 }
 

@@ -25,7 +25,7 @@
 #include "SpeedDlg.h"
 
 const int RATE_MIN = 16;		// // //
-const int RATE_MAX = 400;
+const int RATE_MAX = 960;
 
 // CSpeedDlg dialog
 

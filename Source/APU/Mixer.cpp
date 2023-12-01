@@ -252,7 +252,7 @@ void CMixer::RecomputeMixing()
 	chipFDS.UpdateFdsFilter(m_MixerConfig.FDSLowpass);
 
 	SynthVRC6.volume(Volume * 3.98333f * m_fLevelVRC6, 500);
-	SynthMMC5.volume(Volume * 1.18421f * m_fLevelMMC5, 130);
+	SynthMMC5.volume(Volume * 1.18421f * m_fLevelMMC5, 780);  // 130
 	SynthS5B.volume(Volume * m_fLevelS5B, 1600);  // Not checked
 	SynthAY8930.volume(Volume * m_fLevelAY8930, 1600);  // Not checked
 	SynthSAA1099.volume(Volume * m_fLevelSAA1099, 1600);  // Not checked
@@ -397,6 +397,9 @@ void CMixer::FinishBuffer(int t)
 	for (int i = 0; i < 3; i++) {
 		StoreChannelLevel(CHANID_6581_CH1 + i, get_channel_level(chip6581, i));
 	}
+
+	//auto& chip6581 = *m_APU->m_pMMC5;
+		//StoreChannelLevel(CHANID_MMC5_VOICE, 256);
 }
 
 //
@@ -487,6 +490,12 @@ void CMixer::StoreChannelLevel(int Channel, int Value)
 	// Adjust channel levels for some channels
 	if (Channel == CHANID_VRC6_SAWTOOTH)
 		AbsVol = (AbsVol * 3) / 4;
+
+	if (Channel == CHANID_MMC5_VOICE)
+		AbsVol = (AbsVol * 2) / 36;
+
+	if (Channel == CHANID_MMC5_SQUARE1 || Channel == CHANID_MMC5_SQUARE2)
+		AbsVol = (AbsVol) / 6;
 
 	if (Channel >= CHANID_N163_CH1 && Channel <= CHANID_N163_CH8) {
 		AbsVol /= 15;

@@ -1356,7 +1356,8 @@ void CPatternEditor::DrawCell(CDC *pDC, int PosX, cursor_column_t Column, int Ch
 	if (pNoteData->Note > ECHO ||		// // //
 		pNoteData->Octave > 8 ||
 		EffNumber >= EF_COUNT || 
-		pNoteData->Instrument > MAX_INSTRUMENTS && pNoteData->Instrument != HOLD_INSTRUMENT) {		// // // 050B
+		pNoteData->Instrument > MAX_INSTRUMENTS && pNoteData->Instrument != HOLD_INSTRUMENT
+		&& pNoteData->Instrument != CUT_INSTRUMENT && pNoteData->Instrument != RELEASE_INSTRUMENT) {		// // // 050B
 		if (Column == C_NOTE/* || Column == 4*/) {
 			CString Text;
 			Text.Format(_T("(invalid)"));
@@ -1415,6 +1416,13 @@ void CPatternEditor::DrawCell(CDC *pDC, int PosX, cursor_column_t Column, int Ch
 							if (pNoteData->Instrument == HOLD_INSTRUMENT) {		// // // 050B
 								DrawChar(pDC, PosX + m_iCharWidth * 3 / 2, PosY, '&', DimInst);
 								DrawChar(pDC, PosX + m_iCharWidth * 5 / 2, PosY, '&', DimInst);
+							}
+							else if (pNoteData->Instrument == CUT_INSTRUMENT) {		// // // 050B
+								GradientBar(pDC, PosX + m_iCharWidth * 3 / 2, (m_iRowHeight / 2) - 2, m_iCharWidth * 2 - 11, m_iRowHeight / 4, pColorInfo->Note, pColorInfo->Back);
+							}
+							else if (pNoteData->Instrument == RELEASE_INSTRUMENT) {		// // // 050B
+								pDC->FillSolidRect(PosX + 5, m_iRowHeight / 2 - 3, m_iCharWidth * 2 - 11, 2, pColorInfo->Note);		// // //
+								pDC->FillSolidRect(PosX + 5, m_iRowHeight / 2 + 1, m_iCharWidth * 2 - 11, 2, pColorInfo->Note);
 							}
 							else {
 								DrawChar(pDC, PosX + m_iCharWidth * 3 / 2, PosY, HEX[pNoteData->Instrument >> 4], DimInst);
@@ -1483,7 +1491,9 @@ void CPatternEditor::DrawCell(CDC *pDC, int PosX, cursor_column_t Column, int Ch
 						const char* pSampleName;
 						char pNameLength = 0;
 						if (pNoteData->Instrument != MAX_INSTRUMENTS &&
-							pNoteData->Instrument != HOLD_INSTRUMENT) {
+							pNoteData->Instrument != HOLD_INSTRUMENT &&
+							pNoteData->Instrument != CUT_INSTRUMENT &&
+							pNoteData->Instrument != RELEASE_INSTRUMENT) {
 							auto pDPCMInst = std::dynamic_pointer_cast<const CInstrument2A03>(m_pDocument->GetInstrument(pNoteData->Instrument));
 							if (pDPCMInst) {
 								auto pDSample = pDPCMInst->GetDSample(pNoteData->Octave, pNoteData->Note-1);
@@ -1520,6 +1530,12 @@ void CPatternEditor::DrawCell(CDC *pDC, int PosX, cursor_column_t Column, int Ch
 				BAR(PosX);
 			else if (pNoteData->Instrument == HOLD_INSTRUMENT)		// // // 050B
 				DrawChar(pDC, PosX + m_iCharWidth / 2, PosY, '&', InstColor);
+			else if (pNoteData->Instrument == CUT_INSTRUMENT)	// // // 050B
+				GradientBar(pDC, PosX + 1, (m_iRowHeight / 2) - 2, m_iCharWidth * 2 - 11, m_iRowHeight / 4, InstColor, pColorInfo->Back);
+			else if (pNoteData->Instrument == RELEASE_INSTRUMENT) {		// // // 050B
+				pDC->FillSolidRect(PosX + 1, m_iRowHeight / 2 - 3, m_iCharWidth * 2 - 11, 2, InstColor);		// // //
+				pDC->FillSolidRect(PosX + 1, m_iRowHeight / 2 + 1, m_iCharWidth * 2 - 11, 2, InstColor);
+			}
 			else
 				DrawChar(pDC, PosX + m_iCharWidth / 2, PosY, HEX[pNoteData->Instrument >> 4], InstColor);		// // //
 			break;
@@ -1529,6 +1545,12 @@ void CPatternEditor::DrawCell(CDC *pDC, int PosX, cursor_column_t Column, int Ch
 				BAR(PosX);
 			else if (pNoteData->Instrument == HOLD_INSTRUMENT)		// // // 050B
 				DrawChar(pDC, PosX + m_iCharWidth / 2, PosY, '&', InstColor);
+			else if (pNoteData->Instrument == CUT_INSTRUMENT)	// // // 050B
+				GradientBar(pDC, PosX, (m_iRowHeight / 2) - 2, m_iCharWidth * 2 - 11 - 1, m_iRowHeight / 4, InstColor, pColorInfo->Back);
+			else if (pNoteData->Instrument == RELEASE_INSTRUMENT) {		// // // 050B
+				pDC->FillSolidRect(PosX, m_iRowHeight / 2 - 3, m_iCharWidth * 2 - 11 - 1, 2, InstColor);		// // //
+				pDC->FillSolidRect(PosX, m_iRowHeight / 2 + 1, m_iCharWidth * 2 - 11 - 1, 2, InstColor);
+			}
 			else
 				DrawChar(pDC, PosX + m_iCharWidth / 2, PosY, HEX[pNoteData->Instrument & 0x0F], InstColor);		// // //
 			break;
@@ -1599,7 +1621,7 @@ void CPatternEditor::DrawHeader(CDC *pDC)
 
 	// Corner box
 	pDC->Draw3dRect(0, HEADER_CHAN_START, m_iRowColumnWidth, HEADER_CHAN_HEIGHT, STATIC_COLOR_SCHEME.FRAME_LIGHT, STATIC_COLOR_SCHEME.FRAME_DARK);
-
+	
 	for (int i = 0; i < m_iChannelsVisible; ++i) {
 
 		const int Channel = i + m_iFirstChannel;

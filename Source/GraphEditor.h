@@ -125,6 +125,22 @@ public:
 	void SetMaxItems(int Levels);		// // //
 };
 
+// Special bar graph editor
+class CSBarGraphEditor : public CGraphEditor
+{
+private:
+	int m_iLevels;
+public:
+	CSBarGraphEditor(CSequence* pSequence, int Levels) : CGraphEditor(pSequence), m_iLevels(Levels) { };
+	afx_msg void OnPaint();
+	void HighlightItem(CPoint point);
+	void ModifyItem(CPoint point, bool Redraw);
+	int GetItemHeight() const;
+	int GetItemTop() const override;		// // //
+
+	void SetMaxItems(int Levels);		// // //
+};
+
 // Arpeggio graph editor
 class CArpeggioGraphEditor : public CGraphEditor
 {

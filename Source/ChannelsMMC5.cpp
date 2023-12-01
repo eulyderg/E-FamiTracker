@@ -112,6 +112,75 @@ void CChannelHandlerMMC5::ResetChannel()
 	m_iLengthCounter = 1;
 }
 
+CChannelHandlerMMC5Voice::CChannelHandlerMMC5Voice() : CChannelHandler(0x7FF, 0x0F)
+{
+	m_iDAC = 0;		// // //
+}
+
+void CChannelHandlerMMC5Voice::HandleNoteData(stChanNote* pNoteData, int EffColumns)
+{
+	// // //
+	CChannelHandler::HandleNoteData(pNoteData, EffColumns);
+
+	if (pNoteData->Note != NONE && pNoteData->Note != HALT && pNoteData->Note != RELEASE) {
+		WriteRegister(0x5112, m_iInstrument+1);
+	}
+	else if (pNoteData->Note == HALT) {
+		WriteRegister(0x5011, 0x01);
+		WriteRegister(0x5112, 0x00);
+	}
+	else if (pNoteData->Note == RELEASE) {
+		WriteRegister(0x5112, 0x00);
+	}
+}
+
+bool CChannelHandlerMMC5Voice::HandleEffect(effect_t EffNum, unsigned char EffParam)
+{
+	switch (EffNum) {
+	case EF_DAC:
+		m_iDAC = EffParam;
+		break;
+	default: return CChannelHandler::HandleEffect(EffNum, EffParam);
+	}
+
+	return true;
+}
+
+void CChannelHandlerMMC5Voice::HandleEmptyNote()
+{
+}
+
+void CChannelHandlerMMC5Voice::HandleCut()
+{
+	CutNote();
+}
+
+void CChannelHandlerMMC5Voice::HandleRelease()
+{
+	if (!m_bRelease)
+		ReleaseNote();
+}
+
+bool CChannelHandlerMMC5Voice::CreateInstHandler(inst_type_t Type)
+{
+	switch (Type) {
+	case INST_2A03: case INST_VRC6: case INST_N163: case INST_S5B: case INST_FDS:
+		switch (m_iInstTypeCurrent) {
+		case INST_2A03: case INST_VRC6: case INST_N163: case INST_S5B: case INST_FDS: break;
+		default:
+			m_pInstHandler.reset(new CSeqInstHandler(this, 0x0F, 0x0F, Type == INST_S5B ? 0x40 : 0));
+			return true;
+		}
+	}
+	return false;
+}
+
+void CChannelHandlerMMC5Voice::ResetChannel()
+{
+	CChannelHandler::ResetChannel();
+	m_iDAC = 0;		// // //
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // // // MMC5 Channels
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,6 +244,36 @@ CString CChannelHandlerMMC5::GetCustomEffectString() const		// // //
 		str.AppendFormat(_T(" E%02X"), m_iLengthCounter);
 	if (!m_bEnvelopeLoop || m_bHardwareEnvelope)
 		str.AppendFormat(_T(" EE%X"), !m_bEnvelopeLoop * 2 + m_bHardwareEnvelope);
+
+	return str;
+}
+
+
+
+void CChannelHandlerMMC5Voice::RefreshChannel()		// // //
+{
+	WriteRegister(0x5010, 0x01);
+	//WriteRegister(0x5011, m_iDAC);
+
+	int Period = CalculatePeriod();
+	int Volume = CalculateVolume();
+
+	unsigned char LoFreq = (Period & 0xFF);
+	unsigned char HiFreq = (Period >> 8);
+
+	WriteRegister(0x5113, LoFreq);
+	WriteRegister(0x5114, HiFreq);
+	WriteRegister(0x5115, Volume);
+}
+
+void CChannelHandlerMMC5Voice::ClearRegisters()
+{
+	WriteRegister(0x5010, 0x01);
+}
+
+CString CChannelHandlerMMC5Voice::GetCustomEffectString() const		// // //
+{
+	CString str = _T("");
 
 	return str;
 }

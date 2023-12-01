@@ -27,6 +27,7 @@
  * Displays a sample scope
  *
  */
+bool triggering = true;
 
 CVisualizerScope::CVisualizerScope(bool bBlur) :
 	m_pWindowBuf(NULL),

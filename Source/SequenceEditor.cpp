@@ -253,7 +253,10 @@ void CSequenceEditor::SelectSequence(CSequence *pSequence, int Type, int Instrum
 				m_pGraphEditor = new CNoiseEditor(pSequence, 31); // AY8930 TO FIX
 			else
 				m_pGraphEditor = new CBarGraphEditor(pSequence, m_iMaxDuty);
-			break;	
+			break;
+		//case SEQ_EXTRA:
+		//	m_pGraphEditor = new CSBarGraphEditor(pSequence, 255);
+		//	break;
 	}
 
 	m_pSetting->SelectSequence(pSequence, Type, InstrumentType);

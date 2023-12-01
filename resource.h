@@ -405,8 +405,10 @@
 #define IDC_PWM_START_SPIN              1200
 #define IDC_C_RR                        1201
 #define IDC_STATIC_PITCH                1201
+#define IDC_BOX_FILTER_START            1201
 #define IDC_DELTASTART                  1202
 #define IDC_FB                          1202
+#define IDC_FILTER_START_SPIN           1202
 #define IDC_MAIL                        1208
 #define IDC_WEBPAGE                     1209
 #define IDC_BUG                         1210
@@ -671,7 +673,6 @@
 #define IDC_CHIP_8580                   1496
 #define IDC_CHECK16                     1497
 #define IDC_CHIP_6560                   1497
-#define IDC_EXPANSION_5E2               1497
 #define IDC_EXPANSION_6581              1497
 #define IDC_CHECK17                     1499
 #define IDC_CHIP_8360                   1499
@@ -713,6 +714,8 @@
 #define IDC_PWM_START                   1520
 #define IDC_MFCVSLISTBOX1               1521
 #define IDC_PWM_END                     1521
+#define IDC_FILTER_START                1522
+#define IDC_FILTER_END                  1523
 #define IDC_CHIP_BUTTON_BG              1526
 #define IDC_CUSTOM1                     1527
 #define IDC_SLIDER_ATTACK               1528
@@ -721,6 +724,7 @@
 #define IDC_SLIDER_SUSTAIN              1531
 #define IDC_SLIDER_RELEASE              1532
 #define IDC_PWM_SPEED                   1535
+#define IDC_FILTER_SPEED                1536
 #define IDC_PWM_MODE1                   1537
 #define IDC_PWM_MODE2                   1538
 #define IDC_PWM_MODE3                   1539
@@ -729,6 +733,14 @@
 #define IDC_BOX_PWM_END                 1542
 #define IDC_PWM_END_SPIN                1543
 #define IDC_TEXT_RATE                   1544
+#define IDC_TEXT_RATE2                  1545
+#define IDC_BOX_FILTER_END              1546
+#define IDC_FILTER_END_SPIN             1547
+#define IDC_FILTER_MODE1                1548
+#define IDC_FILTER_MODE2                1549
+#define IDC_FILTER_MODE3                1550
+#define IDC_FILTER_MODE4                1551
+#define IDC_DISABLE_FILTER              1552
 #define IDC_SOUNDCHIPS                  4001
 #define IDD_CHIPS                       4002
 #define IDS_FIND_BEGIN                  9001

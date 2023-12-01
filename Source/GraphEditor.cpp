@@ -704,6 +704,125 @@ void CBarGraphEditor::SetMaxItems(int Levels)		// // //
 	RedrawWindow();
 }
 
+
+// Special bar graph editor (for when the height is zero)
+
+void CSBarGraphEditor::OnPaint()
+{
+	ASSERT(m_pBackDC != NULL);
+
+	CPaintDC dc(this);
+
+	DrawBackground(m_pBackDC, m_iLevels, false, 0);
+	DrawRange(m_pBackDC, m_iLevels, 0);
+
+	// Return now if no sequence is selected
+	if (!m_pSequence) {
+		PaintBuffer(m_pBackDC, &dc);
+		return;
+	}
+
+	// Draw items
+	int Count = m_pSequence->GetItemCount();
+
+	if (!Count) {
+		PaintBuffer(m_pBackDC, &dc);
+		return;
+	}
+
+	int StepWidth = GetItemWidth();
+	int StepHeight = GetItemHeight();		// // //
+	const int Top = GetItemTop();		// // //
+
+	if (m_iHighlightedValue > 0 && m_iHighlightedItem >= 0 && m_iHighlightedItem < Count) {
+		int x = m_GraphRect.left + m_iHighlightedItem * StepWidth + 1;
+		int y = Top + StepHeight * (m_iLevels - m_iHighlightedValue);
+		int w = StepWidth;
+		int h = StepHeight * m_iHighlightedValue;
+		DrawShadowRect(m_pBackDC, x, y, w, h);
+	}
+
+	// Draw items
+	for (int i = 0; i < Count; i++) {
+		int x = m_GraphRect.left + i * StepWidth + 1;
+		int y = Top + StepHeight * (m_iLevels - m_pSequence->GetItem(i));
+		int w = StepWidth;
+		int h = StepHeight * m_pSequence->GetItem(i);
+
+		if (m_iCurrentPlayPos == i)
+			DrawPlayRect(m_pBackDC, x, y, w, h);
+		else if ((m_iHighlightedItem == i) && (m_pSequence->GetItem(i) >= m_iHighlightedValue) && !IsEditLine())
+			DrawCursorRect(m_pBackDC, x, y, w, h);
+		else
+			DrawRect(m_pBackDC, x, y, w, h);
+	}
+
+	DrawLoopRelease(m_pBackDC, StepWidth);		// // //
+	DrawLine(m_pBackDC);
+
+	PaintBuffer(m_pBackDC, &dc);
+}
+
+void CSBarGraphEditor::HighlightItem(CPoint point)
+{
+	int ItemWidth = GetItemWidth();
+	int ItemHeight = 1;
+	int ItemIndex = (point.x - GRAPH_LEFT) / ItemWidth;
+	int ItemValue = m_iLevels - (((point.y - GetItemTop()) + (ItemHeight / 2)) / ItemHeight);		// // //
+	int LastItem = m_iHighlightedItem;
+	int LastValue = m_iHighlightedValue;
+
+	m_iHighlightedItem = ItemIndex;
+	m_iHighlightedValue = ItemValue;
+
+	if (m_GraphRect.PtInRect(point) == 0 || unsigned(ItemIndex) >= m_pSequence->GetItemCount()) {
+		m_iHighlightedItem = -1;
+		m_iHighlightedValue = 0;
+	}
+
+	if (LastItem != m_iHighlightedItem || LastValue != m_iHighlightedValue)
+		RedrawWindow(NULL);
+}
+
+void CSBarGraphEditor::ModifyItem(CPoint point, bool Redraw)
+{
+	int ItemWidth = GetItemWidth();
+	int ItemHeight = GetItemHeight();
+	int ItemIndex = (point.x - GRAPH_LEFT) / ItemWidth;
+	int ItemValue = m_iLevels - (((point.y - GetItemTop()) + (ItemHeight / 2)) / ItemHeight);
+
+	if (ItemValue < 0)
+		ItemValue = 0;
+	if (ItemValue > m_iLevels)
+		ItemValue = m_iLevels;
+
+	if (ItemIndex < 0 || ItemIndex >= (int)m_pSequence->GetItemCount())
+		return;
+
+	m_iHighlightedItem = ItemIndex;
+	m_iHighlightedValue = ItemValue;
+
+	m_pSequence->SetItem(ItemIndex, ItemValue);
+
+	CGraphEditor::ModifyItem(point, Redraw);
+}
+
+int CSBarGraphEditor::GetItemHeight() const
+{
+	return 1;		// // //
+}
+
+int CSBarGraphEditor::GetItemTop() const		// // //
+{
+	return m_GraphRect.top + m_GraphRect.Height() % m_iLevels;
+}
+
+void CSBarGraphEditor::SetMaxItems(int Levels)		// // //
+{
+	m_iLevels = Levels;
+	RedrawWindow();
+}
+
 // Arpeggio graph editor
 
 IMPLEMENT_DYNAMIC(CArpeggioGraphEditor, CGraphEditor)

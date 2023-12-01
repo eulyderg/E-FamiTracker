@@ -60,7 +60,15 @@ public:
 	afx_msg void OnPWMPingPongClicked();
 	afx_msg void OnPWMOnceClicked();
 	afx_msg void OnPWMSustainClicked();
+	afx_msg void OnFilterStartSpinChange();
+	afx_msg void OnFilterEndSpinChange();
+	afx_msg void OnFilterDisableClicked();
+	afx_msg void OnFilterLoopClicked();
+	afx_msg void OnFilterPingPongClicked();
+	afx_msg void OnFilterOnceClicked();
+	afx_msg void OnFilterSustainClicked();
 private:
 	void EnablePWM(bool Enabled = 1);
+	void EnableFilter(bool Enabled = 1);
 
 };

@@ -68,16 +68,20 @@ public:
 	void 	SetPWMSpeed(int Value) { m_pPWMSpeed = Value; InstrumentChanged(); };		// // //
 	int  	GetPWMMode() const { return m_pPWMMode; };		// // //
 	void 	SetPWMMode(int Value) { m_pPWMMode = Value; InstrumentChanged(); };		// // //
+	int  	GetFilterStart() const { return m_pFilterStart; };		// // //
+	void 	SetFilterStart(int Value) { m_pFilterStart = Value; InstrumentChanged(); };		// // //
+	int  	GetFilterEnd() const { return m_pFilterEnd; };		// // //
+	void 	SetFilterEnd(int Value) { m_pFilterEnd = Value; InstrumentChanged(); };		// // //
+	int  	GetFilterSpeed() const { return m_pFilterSpeed; };		// // //
+	void 	SetFilterSpeed(int Value) { m_pFilterSpeed = Value; InstrumentChanged(); };		// // //
+	int  	GetFilterMode() const { return m_pFilterMode; };		// // //
+	void 	SetFilterMode(int Value) { m_pFilterMode = Value; InstrumentChanged(); };		// // //
+	int  	GetFilterPass() const { return m_pFilterPass; };		// // //
+	void 	SetFilterPass(int Value) { m_pFilterPass = Value; InstrumentChanged(); };		// // //
 
 protected:
 	virtual void	CloneFrom(const CInstrument *pInst);		// // //
 
-private:
-	void StoreSequence(CDocumentFile *pDocFile, const CSequence *pSeq);		// // //
-	CSequence *LoadSequence(CDocumentFile *pDocFile) const;
-	void StoreInstSequence(CInstrumentFile *pDocFile, const CSequence *pSeq);
-	CSequence *LoadInstSequence(CInstrumentFile *pFile) const;
-	void DoubleVolume() const;		// // //
 
 public:
 	static const int SEQUENCE_COUNT = 6;		// // //
@@ -86,7 +90,6 @@ public:
 	
 private:
 	// Instrument data
-	std::vector<std::unique_ptr<CSequence>> m_pSequence;
 	int m_pEnvelopeAD;
 	int m_pEnvelopeSR;
 
@@ -94,11 +97,11 @@ private:
 	int m_pPWMEnd;
 	int m_pPWMSpeed;
 	int m_pPWMMode;
+
+	int m_pFilterStart;
+	int m_pFilterEnd;
+	int m_pFilterSpeed;
+	int m_pFilterMode;
+	int m_pFilterPass;
 	
-public: // // // porting CSeqInstrument
-	virtual int		GetSeqEnable(int Index) const;
-	virtual int		GetSeqIndex(int Index) const;
-	virtual void	SetSeqIndex(int Index, int Value);
-	CSequence		*GetSequence(int SeqType) const;		// // //
-	virtual void	SetSequence(int SeqType, CSequence *pSeq);		// // //
 };

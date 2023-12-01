@@ -23,18 +23,17 @@
 #pragma once
 
 //
-// Derived channels, 6581
+// Derived channels, POKEY
 //
 
-class CChannelHandler6581 : public CChannelHandler, public CChannelHandlerInterfaceSID {
+class CChannelHandlerPOKEY : public CChannelHandler, public CChannelHandlerInterfaceSID {
 public:
-	CChannelHandler6581();
+	CChannelHandlerPOKEY();
 	void	ResetChannel() override;
 	void	RefreshChannel() override;
 
 	void  SetADSR(unsigned char EnvAD, unsigned char EnvSR) override final;
 	void  SetPulseWidth(unsigned int PulseWidth) override final;
-	void  SetFilterCutoff(unsigned int FilterCutoff) override final;
 	unsigned int GetPulseWidth() const override final;
 
 	int getDutyMax() const override;
@@ -69,18 +68,6 @@ protected:
 	// Instance members
 protected:
 
-	unsigned int m_iPulseWidth;
-	unsigned char m_iTestBit;
-	unsigned char m_iGateBit;
-	unsigned char m_iRingBit;
-	unsigned char m_iSyncBit;
-
-	unsigned char m_iCurVol = 15;
-
-	unsigned char m_iGateCounter = 0;
-
-	unsigned char m_iEnvAD;
-	unsigned char m_iEnvSR;
 
 	bool m_bUpdate;
 };

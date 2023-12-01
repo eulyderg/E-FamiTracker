@@ -38,7 +38,7 @@ inline int modulo(int i, int n) {
 }
 
 
-LPCTSTR CInstrumentSID::SEQUENCE_NAME[] = {_T("Volume"), _T("Arpeggio"), _T("Pitch"), _T("Hi-pitch"), _T("Pulse Width"), _T("Waveform")};
+LPCTSTR CInstrumentSID::SEQUENCE_NAME[] = {_T("Global Volume"), _T("Arpeggio"), _T("Pitch"), _T("Hi-pitch"), _T("Waveform"), _T("Pulse Width")};
 
 CInstrumentSID::CInstrumentSID() : CSeqInstrument(INST_SID), // // //
 m_pEnvelopeAD(0x0A),
@@ -46,11 +46,12 @@ m_pEnvelopeSR(0x00),
 m_pPWMStart(0x800),
 m_pPWMEnd(0x800),
 m_pPWMSpeed(0x00),
-m_pPWMMode(PWM_DISABLED)
+m_pPWMMode(PWM_DISABLED),
+m_pFilterStart(0x800),
+m_pFilterEnd(0x800),
+m_pFilterSpeed(0x00),
+m_pFilterMode(PWM_DISABLED)
 {
-	m_pSequence.resize(SEQUENCE_COUNT);
-	for (int i = 0; i < SEQUENCE_COUNT; ++i)
-		m_pSequence[i].reset(new CSequence());
 }
 
 CInstrument * CInstrumentSID::Clone() const
@@ -62,7 +63,7 @@ CInstrument * CInstrumentSID::Clone() const
 
 void CInstrumentSID::CloneFrom(const CInstrument *pInst)
 {
-	CInstrument::CloneFrom(pInst);
+	CSeqInstrument::CloneFrom(pInst);
 	
 	if (auto pNew = dynamic_cast<const CInstrumentSID*>(pInst)) {
 	// Copy parameters
@@ -75,10 +76,11 @@ void CInstrumentSID::CloneFrom(const CInstrument *pInst)
 		SetPWMEnd(pNew->GetPWMEnd());
 		SetPWMSpeed(pNew->GetPWMSpeed());
 		SetPWMMode(pNew->GetPWMMode());
+		SetFilterStart(pNew->GetFilterStart());
+		SetFilterEnd(pNew->GetFilterEnd());
+		SetFilterSpeed(pNew->GetFilterSpeed());
+		SetFilterMode(pNew->GetFilterMode());
 
-		// Copy sequences
-		for (int i = 0; i < SEQUENCE_COUNT; ++i)		// // //
-			SetSequence(i, new CSequence(*pNew->GetSequence(i)));
 	}
 }
 
@@ -86,96 +88,23 @@ void CInstrumentSID::Setup()
 {
 }
 
-void CInstrumentSID::StoreInstSequence(CInstrumentFile *pFile, const CSequence *pSeq)
-{
-	// Store number of items in this sequence
-	pFile->WriteInt(pSeq->GetItemCount());
-	// Store loop point
-	pFile->WriteInt(pSeq->GetLoopPoint());
-	// Store release point (v4)
-	pFile->WriteInt(pSeq->GetReleasePoint());
-	// Store setting (v4)
-	pFile->WriteInt(pSeq->GetSetting());
-	// Store items
-	for (unsigned i = 0; i < pSeq->GetItemCount(); ++i)
-		pFile->WriteChar(pSeq->GetItem(i));
-}
-
-CSequence * CInstrumentSID::LoadInstSequence(CInstrumentFile *pFile) const
-{
-	int SeqCount = CModuleException::AssertRangeFmt(pFile->ReadInt(), 0U, 0xFFU, "Sequence item count", "%u");
-	int Loop = CModuleException::AssertRangeFmt(static_cast<int>(pFile->ReadInt()), -1, SeqCount - 1, "Sequence loop point", "%u");
-	int Release = CModuleException::AssertRangeFmt(static_cast<int>(pFile->ReadInt()), -1, SeqCount - 1, "Sequence release point", "%u");
-
-	CSequence *pSeq = new CSequence();
-	pSeq->SetItemCount(SeqCount > MAX_SEQUENCE_ITEMS ? MAX_SEQUENCE_ITEMS : SeqCount);
-	pSeq->SetLoopPoint(Loop);
-	pSeq->SetReleasePoint(Release);
-	pSeq->SetSetting(static_cast<seq_setting_t>(pFile->ReadInt()));		// // //
-
-	for (int i = 0; i < SeqCount; ++i)
-		pSeq->SetItem(i, pFile->ReadChar());
-
-	return pSeq;
-}
-
-void CInstrumentSID::StoreSequence(CDocumentFile *pDocFile, const CSequence *pSeq)
-{
-	// Store number of items in this sequence
-	pDocFile->WriteBlockChar(pSeq->GetItemCount());
-	// Store loop point
-	pDocFile->WriteBlockInt(pSeq->GetLoopPoint());
-	// Store release point (v4)
-	pDocFile->WriteBlockInt(pSeq->GetReleasePoint());
-	// Store setting (v4)
-	pDocFile->WriteBlockInt(pSeq->GetSetting());
-	// Store items
-	for (unsigned int j = 0; j < pSeq->GetItemCount(); j++) {
-		pDocFile->WriteBlockChar(pSeq->GetItem(j));
-	}
-}
-
-CSequence * CInstrumentSID::LoadSequence(CDocumentFile *pDocFile) const
-{
-	int SeqCount = static_cast<unsigned char>(pDocFile->GetBlockChar());
-	unsigned int LoopPoint = CModuleException::AssertRangeFmt(pDocFile->GetBlockInt(), -1, SeqCount - 1, "Sequence loop point", "%i");;
-	unsigned int ReleasePoint = CModuleException::AssertRangeFmt(pDocFile->GetBlockInt(), -1, SeqCount - 1, "Sequence release point", "%i");;
-
-	// CModuleException::AssertRangeFmt(SeqCount, 0, MAX_SEQUENCE_ITEMS, "Sequence item count", "%i");
-
-	CSequence *pSeq = new CSequence();
-	pSeq->SetItemCount(SeqCount > MAX_SEQUENCE_ITEMS ? MAX_SEQUENCE_ITEMS : SeqCount);
-	pSeq->SetLoopPoint(LoopPoint);
-	pSeq->SetReleasePoint(ReleasePoint);
-	pSeq->SetSetting(static_cast<seq_setting_t>(pDocFile->GetBlockInt()));		// // //
-
-	for (int x = 0; x < SeqCount; ++x) {
-		char Value = pDocFile->GetBlockChar();
-		pSeq->SetItem(x, Value);
-	}
-
-	return pSeq;
-}
-
-void CInstrumentSID::DoubleVolume() const
-{
-	//CSequence *pVol = m_pSequence[SEQ_VOLUME].get();
-	//for (unsigned int i = 0; i < pVol->GetItemCount(); ++i)
-		//pVol->SetItem(i, pVol->GetItem(i) * 2);
-}
-
 void CInstrumentSID::Store(CDocumentFile *pDocFile)
 {
-	pDocFile->WriteBlockInt(2);
+
+	pDocFile->WriteBlockInt(4);
 	pDocFile->WriteBlockChar(m_pEnvelopeAD);
 	pDocFile->WriteBlockChar(m_pEnvelopeSR);
 	pDocFile->WriteBlockInt(m_pPWMStart);
 	pDocFile->WriteBlockInt(m_pPWMEnd);
 	pDocFile->WriteBlockChar(m_pPWMSpeed);
 	pDocFile->WriteBlockChar(m_pPWMMode);
-	// Sequences
-	for (int i = 0; i < SEQUENCE_COUNT; ++i)		// // //
-		StoreSequence(pDocFile, GetSequence(i));
+	pDocFile->WriteBlockInt(m_pFilterStart);
+	pDocFile->WriteBlockInt(m_pFilterEnd);
+	pDocFile->WriteBlockChar(m_pFilterSpeed);
+	pDocFile->WriteBlockChar(m_pFilterMode);
+
+	// Store sequences
+	CSeqInstrument::Store(pDocFile);		// // //
 }
 
 bool CInstrumentSID::Load(CDocumentFile *pDocFile)
@@ -191,12 +120,15 @@ bool CInstrumentSID::Load(CDocumentFile *pDocFile)
 			m_pPWMSpeed = pDocFile->GetBlockChar();
 			m_pPWMMode = pDocFile->GetBlockChar();
 		}
-		LoadSequence(pDocFile);
-		LoadSequence(pDocFile);
-		LoadSequence(pDocFile);
-		LoadSequence(pDocFile);
-		LoadSequence(pDocFile);
-		LoadSequence(pDocFile);
+		if (instversion >= 3) {
+			m_pFilterStart = pDocFile->GetBlockInt();
+			m_pFilterEnd = pDocFile->GetBlockInt();
+			m_pFilterSpeed = pDocFile->GetBlockChar();
+			m_pFilterMode = pDocFile->GetBlockChar();
+		}
+		if (instversion >= 4) {
+			CSeqInstrument::Load(pDocFile);
+		}
 	} else {
 		pDocFile->RollbackPointer(4);
 		unsigned int a = pDocFile->GetBlockInt();
@@ -205,9 +137,6 @@ bool CInstrumentSID::Load(CDocumentFile *pDocFile)
 		if (a < 256 && (b & 0xFF) != 0x00) {
 		}
 		else {
-			SetSequence(SEQ_VOLUME, LoadSequence(pDocFile));
-			SetSequence(SEQ_ARPEGGIO, LoadSequence(pDocFile));
-			SetSequence(SEQ_PITCH, LoadSequence(pDocFile));
 		}
 	}
 
@@ -223,17 +152,13 @@ void CInstrumentSID::SaveFile(CInstrumentFile *pFile)
 {
 
 	// Sequences
-	for (int i = 0; i < SEQUENCE_COUNT; ++i)
-		StoreInstSequence(pFile, GetSequence(i));
+	CSeqInstrument::SaveFile(pFile);		// // //
 }
 
 bool CInstrumentSID::LoadFile(CInstrumentFile *pFile, int iVersion)
 {
 	// Sequences
-	for (int i = 0; i < SEQUENCE_COUNT; ++i)		// // //
-		SetSequence(i, LoadInstSequence(pFile));
-
-	if (iVersion <= 22) DoubleVolume();
+	CSeqInstrument::LoadFile(pFile, iVersion);		// // //
 
 	return true;
 }
@@ -247,32 +172,6 @@ bool CInstrumentSID::CanRelease() const
 {
 	const CSequence *pVol = GetSequence(SEQ_VOLUME);
 	return pVol && pVol->GetItemCount() && pVol->GetReleasePoint() != -1;
-}
-
-int	CInstrumentSID::GetSeqEnable(int Index) const
-{
-	return m_iSeqEnable[Index];
-}
-
-int	CInstrumentSID::GetSeqIndex(int Index) const
-{
-	ASSERT(false);
-	return 0;
-}
-
-void CInstrumentSID::SetSeqIndex(int Index, int Value)
-{
-	ASSERT(false);
-}
-
-CSequence * CInstrumentSID::GetSequence(int SeqType) const		// // //
-{
-	return m_pSequence[SeqType].get();
-}
-
-void CInstrumentSID::SetSequence(int SeqType, CSequence *pSeq)
-{
-	m_pSequence[SeqType].reset(pSeq);
 }
 
 

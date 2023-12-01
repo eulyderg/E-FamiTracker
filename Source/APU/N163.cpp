@@ -138,7 +138,7 @@ void CN163::Mix(int32_t Value, uint32_t Time, uint8_t ChanID)
 	int32_t Delta = Value - m_iLastValue;
 
 	if (Delta)
-		m_pMixer->AddValue(ChanID, SNDCHIP_N163, Delta, Value, Time + m_iGlobalTime);
+		m_pMixer->AddValue(ChanID, SNDCHIP_N163, Delta, Value*2, Time + m_iGlobalTime);
 
 	m_iLastValue = Value;
 }

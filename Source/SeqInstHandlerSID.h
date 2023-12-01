@@ -64,4 +64,12 @@ private:
 	int m_pPWMSpeed;
 	int m_pPWMMode;
 	int m_pPWMDirection;
+
+	int m_pFilterValue;
+	int m_pFilterStart;
+	int m_pFilterEnd;
+	int m_pFilterSpeed;
+	int m_pFilterMode;
+	int m_pFilterPass;
+	int m_pFilterDirection;
 };

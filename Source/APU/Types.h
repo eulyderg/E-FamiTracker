@@ -25,16 +25,18 @@
 #include <cstdint>
 
 const int SNDCHIP_NONE = 0;
-const int SNDCHIP_VRC6 = 1;			// Konami VRCVI
-const int SNDCHIP_VRC7 = 2;			// Konami VRCVII
-const int SNDCHIP_FDS  = 4;			// Famicom Disk Sound
-const int SNDCHIP_MMC5 = 8;			// Nintendo MMC5
-const int SNDCHIP_N163 = 16;		// Namco N-106
-const int SNDCHIP_S5B  = 32;		// Sunsoft 5B
+const int SNDCHIP_VRC6 = 1;				// Konami VRCVI
+const int SNDCHIP_VRC7 = 2;				// Konami VRCVII
+const int SNDCHIP_FDS  = 4;				// Famicom Disk Sound
+const int SNDCHIP_MMC5 = 8;				// Nintendo MMC5
+const int SNDCHIP_N163 = 16;			// Namco N-106
+const int SNDCHIP_S5B  = 32;			// Sunsoft 5B
 const int SNDCHIP_AY8930  = 64;		// Microchip AY8930
-const int SNDCHIP_SAA1099 = 128;		// Philips SAA1099
-const int SNDCHIP_5E01 = 256;		// Eulous 5E01
-const int SNDCHIP_6581 = 512;		// MOS Technology 6581
+const int SNDCHIP_SAA1099 = 128;	// Philips SAA1099
+const int SNDCHIP_5E01 = 256;			// Eulous 5E01
+const int SNDCHIP_6581 = 512;			// MOS Technology 6581
+const int SNDCHIP_8580 = 1024;		// MOS Technology 8580
+const int SNDCHIP_POKEY   = 2048;	// Atari POKEY
 
 enum chan_id_t {
 	CHANID_SQUARE1,
@@ -94,7 +96,17 @@ enum chan_id_t {
 	CHANID_6581_CH2,
 	CHANID_6581_CH3,
 
-	CHANNELS		/* Total number of channels */
+	CHANNELS,		/* Total number of channels */
+
+	CHANID_8580_CH1,
+	CHANID_8580_CH2,
+	CHANID_8580_CH3,
+
+	CHANID_POKEY_CH1,
+	CHANID_POKEY_CH2,
+	CHANID_POKEY_CH3,
+	CHANID_POKEY_CH4,
+
 };
 
 enum apu_machine_t {

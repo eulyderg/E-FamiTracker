@@ -268,6 +268,9 @@
     <Filter Include="Source Files\Sound Driver\Emulation\Sound Chips\External\residfp\resample">
       <UniqueIdentifier>{30ba967b-931c-434e-9db7-40d93e0b00c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Sound Driver\Emulation\Sound Chips\External\mame">
+      <UniqueIdentifier>{d1db49b7-2c67-4e8f-b7a4-2a6198adcf35}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Exception.cpp">

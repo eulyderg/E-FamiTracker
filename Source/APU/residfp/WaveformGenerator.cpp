@@ -146,6 +146,8 @@ void WaveformGenerator::set_noise_output()
         ((shift_register & (1 << 20)) >> 15) |  // Bit  2 -> bit  5
         ((shift_register & (1 << 22)) >> 18);   // Bit  0 -> bit  4
 
+    //noise_output = ((noise_output & 0x000800) >> 11) * 0xFFF; // SID PULSE NOISE
+
     no_noise_or_noise_output = no_noise | noise_output;
 }
 

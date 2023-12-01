@@ -189,17 +189,17 @@ void CSoundGen::CreateChannels()
 	AssignChannel(new CTrackerChannel(_T("Pulse 1"), _T("PU1"), SNDCHIP_NONE, CHANID_SQUARE1));
 	AssignChannel(new CTrackerChannel(_T("Pulse 1 SFX"), _T("PU1*"), SNDCHIP_NONE, CHANID_SQUARE1));
 #else
-	AssignChannel(new CTrackerChannel(_T("Pulse 1"), _T("PU1"), SNDCHIP_NONE, CHANID_SQUARE1));
-	AssignChannel(new CTrackerChannel(_T("Pulse 2"), _T("PU2"), SNDCHIP_NONE, CHANID_SQUARE2));
+	AssignChannel(new CTrackerChannel(_T("2A03 Pulse 1"), _T("PU1"), SNDCHIP_NONE, CHANID_SQUARE1));
+	AssignChannel(new CTrackerChannel(_T("2A03 Pulse 2"), _T("PU2"), SNDCHIP_NONE, CHANID_SQUARE2));
 #endif
-	AssignChannel(new CTrackerChannel(_T("Triangle"), _T("TRI"), SNDCHIP_NONE, CHANID_TRIANGLE));
-	AssignChannel(new CTrackerChannel(_T("Noise"), _T("NOI"), SNDCHIP_NONE, CHANID_NOISE));
-	AssignChannel(new CTrackerChannel(_T("DPCM"), _T("DMC"), SNDCHIP_NONE, CHANID_DPCM));
+	AssignChannel(new CTrackerChannel(_T("2A03 Triangle"), _T("TRI"), SNDCHIP_NONE, CHANID_TRIANGLE));
+	AssignChannel(new CTrackerChannel(_T("2A03 Noise"), _T("NOI"), SNDCHIP_NONE, CHANID_NOISE));
+	AssignChannel(new CTrackerChannel(_T("2A03 DPCM"), _T("DMC"), SNDCHIP_NONE, CHANID_DPCM));
 
 	// Konami VRC6
 	AssignChannel(new CTrackerChannel(_T("VRC6 Pulse 1"), _T("V1"), SNDCHIP_VRC6, CHANID_VRC6_PULSE1));
 	AssignChannel(new CTrackerChannel(_T("VRC6 Pulse 2"), _T("V2"), SNDCHIP_VRC6, CHANID_VRC6_PULSE2));
-	AssignChannel(new CTrackerChannel(_T("Sawtooth"), _T("SAW"), SNDCHIP_VRC6, CHANID_VRC6_SAWTOOTH));
+	AssignChannel(new CTrackerChannel(_T("VRC6 Sawtooth"), _T("SAW"), SNDCHIP_VRC6, CHANID_VRC6_SAWTOOTH));
 
 	// // // Nintendo MMC5
 	AssignChannel(new CTrackerChannel(_T("MMC5 Pulse 1"), _T("PU3"), SNDCHIP_MMC5, CHANID_MMC5_SQUARE1));
@@ -207,43 +207,43 @@ void CSoundGen::CreateChannels()
 	AssignChannel(new CTrackerChannel(_T("MMC5 PCM"), _T("PCM"), SNDCHIP_MMC5, CHANID_MMC5_VOICE)); // null channel handler
 
 	// Namco N163
-	AssignChannel(new CTrackerChannel(_T("Namco 1"), _T("N1"), SNDCHIP_N163, CHANID_N163_CH1));
-	AssignChannel(new CTrackerChannel(_T("Namco 2"), _T("N2"), SNDCHIP_N163, CHANID_N163_CH2));
-	AssignChannel(new CTrackerChannel(_T("Namco 3"), _T("N3"), SNDCHIP_N163, CHANID_N163_CH3));
-	AssignChannel(new CTrackerChannel(_T("Namco 4"), _T("N4"), SNDCHIP_N163, CHANID_N163_CH4));
-	AssignChannel(new CTrackerChannel(_T("Namco 5"), _T("N5"), SNDCHIP_N163, CHANID_N163_CH5));
-	AssignChannel(new CTrackerChannel(_T("Namco 6"), _T("N6"), SNDCHIP_N163, CHANID_N163_CH6));
-	AssignChannel(new CTrackerChannel(_T("Namco 7"), _T("N7"), SNDCHIP_N163, CHANID_N163_CH7));
-	AssignChannel(new CTrackerChannel(_T("Namco 8"), _T("N8"), SNDCHIP_N163, CHANID_N163_CH8));
+	AssignChannel(new CTrackerChannel(_T("N163 Channel 1"), _T("N1"), SNDCHIP_N163, CHANID_N163_CH1));
+	AssignChannel(new CTrackerChannel(_T("N163 Channel 2"), _T("N2"), SNDCHIP_N163, CHANID_N163_CH2));
+	AssignChannel(new CTrackerChannel(_T("N163 Channel 3"), _T("N3"), SNDCHIP_N163, CHANID_N163_CH3));
+	AssignChannel(new CTrackerChannel(_T("N163 Channel 4"), _T("N4"), SNDCHIP_N163, CHANID_N163_CH4));
+	AssignChannel(new CTrackerChannel(_T("N163 Channel 5"), _T("N5"), SNDCHIP_N163, CHANID_N163_CH5));
+	AssignChannel(new CTrackerChannel(_T("N163 Channel 6"), _T("N6"), SNDCHIP_N163, CHANID_N163_CH6));
+	AssignChannel(new CTrackerChannel(_T("N163 Channel 7"), _T("N7"), SNDCHIP_N163, CHANID_N163_CH7));
+	AssignChannel(new CTrackerChannel(_T("N163 Channel 8"), _T("N8"), SNDCHIP_N163, CHANID_N163_CH8));
 
 	// Nintendo FDS
-	AssignChannel(new CTrackerChannel(_T("FDS"), _T("FDS"), SNDCHIP_FDS, CHANID_FDS));
+	AssignChannel(new CTrackerChannel(_T("2C33"), _T("2C33"), SNDCHIP_FDS, CHANID_FDS));
 
 	// Konami VRC7
-	AssignChannel(new CTrackerChannel(_T("FM Channel 1"), _T("FM1"), SNDCHIP_VRC7, CHANID_VRC7_CH1));
-	AssignChannel(new CTrackerChannel(_T("FM Channel 2"), _T("FM2"), SNDCHIP_VRC7, CHANID_VRC7_CH2));
-	AssignChannel(new CTrackerChannel(_T("FM Channel 3"), _T("FM3"), SNDCHIP_VRC7, CHANID_VRC7_CH3));
-	AssignChannel(new CTrackerChannel(_T("FM Channel 4"), _T("FM4"), SNDCHIP_VRC7, CHANID_VRC7_CH4));
-	AssignChannel(new CTrackerChannel(_T("FM Channel 5"), _T("FM5"), SNDCHIP_VRC7, CHANID_VRC7_CH5));
-	AssignChannel(new CTrackerChannel(_T("FM Channel 6"), _T("FM6"), SNDCHIP_VRC7, CHANID_VRC7_CH6));
+	AssignChannel(new CTrackerChannel(_T("VRC7 Channel 1"), _T("FM1"), SNDCHIP_VRC7, CHANID_VRC7_CH1));
+	AssignChannel(new CTrackerChannel(_T("VRC7 Channel 2"), _T("FM2"), SNDCHIP_VRC7, CHANID_VRC7_CH2));
+	AssignChannel(new CTrackerChannel(_T("VRC7 Channel 3"), _T("FM3"), SNDCHIP_VRC7, CHANID_VRC7_CH3));
+	AssignChannel(new CTrackerChannel(_T("VRC7 Channel 4"), _T("FM4"), SNDCHIP_VRC7, CHANID_VRC7_CH4));
+	AssignChannel(new CTrackerChannel(_T("VRC7 Channel 5"), _T("FM5"), SNDCHIP_VRC7, CHANID_VRC7_CH5));
+	AssignChannel(new CTrackerChannel(_T("VRC7 Channel 6"), _T("FM6"), SNDCHIP_VRC7, CHANID_VRC7_CH6));
 
 	// // // Sunsoft 5B
-	AssignChannel(new CTrackerChannel(_T("5B Square 1"), _T("5B1"), SNDCHIP_S5B, CHANID_S5B_CH1));
-	AssignChannel(new CTrackerChannel(_T("5B Square 2"), _T("5B2"), SNDCHIP_S5B, CHANID_S5B_CH2));
-	AssignChannel(new CTrackerChannel(_T("5B Square 3"), _T("5B3"), SNDCHIP_S5B, CHANID_S5B_CH3));
+	AssignChannel(new CTrackerChannel(_T("S5B Channel 1"), _T("5B1"), SNDCHIP_S5B, CHANID_S5B_CH1));
+	AssignChannel(new CTrackerChannel(_T("S5B Channel 2"), _T("5B2"), SNDCHIP_S5B, CHANID_S5B_CH2));
+	AssignChannel(new CTrackerChannel(_T("S5B Channel 3"), _T("5B3"), SNDCHIP_S5B, CHANID_S5B_CH3));
 
 	// // // Microchip AY8930
-	AssignChannel(new CTrackerChannel(_T("AY8930 Pulse 1"), _T("AY1"), SNDCHIP_AY8930, CHANID_AY8930_CH1));
-	AssignChannel(new CTrackerChannel(_T("AY8930 Pulse 2"), _T("AY2"), SNDCHIP_AY8930, CHANID_AY8930_CH2));
-	AssignChannel(new CTrackerChannel(_T("AY8930 Pulse 3"), _T("AY3"), SNDCHIP_AY8930, CHANID_AY8930_CH3));
+	AssignChannel(new CTrackerChannel(_T("AY8930 Ch. 1"), _T("AY1"), SNDCHIP_AY8930, CHANID_AY8930_CH1));
+	AssignChannel(new CTrackerChannel(_T("AY8930 Ch. 2"), _T("AY2"), SNDCHIP_AY8930, CHANID_AY8930_CH2));
+	AssignChannel(new CTrackerChannel(_T("AY8930 Ch. 3"), _T("AY3"), SNDCHIP_AY8930, CHANID_AY8930_CH3));
 
 	// // // Philips SAA1099
-	AssignChannel(new CTrackerChannel(_T("SAA Channel 1"), _T("SA1"), SNDCHIP_SAA1099, CHANID_SAA1099_CH1));
-	AssignChannel(new CTrackerChannel(_T("SAA Channel 2"), _T("SA2"), SNDCHIP_SAA1099, CHANID_SAA1099_CH2));
-	AssignChannel(new CTrackerChannel(_T("SAA Channel 3"), _T("SA3"), SNDCHIP_SAA1099, CHANID_SAA1099_CH3));
-	AssignChannel(new CTrackerChannel(_T("SAA Channel 4"), _T("SA4"), SNDCHIP_SAA1099, CHANID_SAA1099_CH4));
-	AssignChannel(new CTrackerChannel(_T("SAA Channel 5"), _T("SA5"), SNDCHIP_SAA1099, CHANID_SAA1099_CH5));
-	AssignChannel(new CTrackerChannel(_T("SAA Channel 6"), _T("SA6"), SNDCHIP_SAA1099, CHANID_SAA1099_CH6));
+	AssignChannel(new CTrackerChannel(_T("SAA1099 Ch. 1"), _T("SA1"), SNDCHIP_SAA1099, CHANID_SAA1099_CH1));
+	AssignChannel(new CTrackerChannel(_T("SAA1099 Ch. 2"), _T("SA2"), SNDCHIP_SAA1099, CHANID_SAA1099_CH2));
+	AssignChannel(new CTrackerChannel(_T("SAA1099 Ch. 3"), _T("SA3"), SNDCHIP_SAA1099, CHANID_SAA1099_CH3));
+	AssignChannel(new CTrackerChannel(_T("SAA1099 Ch. 4"), _T("SA4"), SNDCHIP_SAA1099, CHANID_SAA1099_CH4));
+	AssignChannel(new CTrackerChannel(_T("SAA1099 Ch. 5"), _T("SA5"), SNDCHIP_SAA1099, CHANID_SAA1099_CH5));
+	AssignChannel(new CTrackerChannel(_T("SAA1099 Ch. 6"), _T("SA6"), SNDCHIP_SAA1099, CHANID_SAA1099_CH6));
 
 	// // // Eulous 5E01
 	AssignChannel(new CTrackerChannel(_T("5E01 Pulse 1"), _T("5E1"), SNDCHIP_5E01, CHANID_5E01_SQUARE1));
@@ -462,6 +462,10 @@ void CSoundGen::DocumentPropertiesChanged(CFamiTrackerDoc *pDocument)
 		// // // SID
 		Pitch = (Freq * 16777216 / CAPU::BASE_FREQ_NTSC) - 0.5;
 		m_iNoteLookupTableSID[i] = (unsigned int)(Pitch - pDocument->GetDetuneOffset(0, i));		// // //
+
+		// // // MMC5 PCM
+		Pitch = (Freq / 523.25) * 0x0100;
+		m_iNoteLookupTablePCM[i] = (unsigned int)(Pitch - pDocument->GetDetuneOffset(0, i));		// // //
 	}
 	
 	// // // Setup note tables
@@ -494,6 +498,8 @@ void CSoundGen::DocumentPropertiesChanged(CFamiTrackerDoc *pDocument)
 			Table = m_iNoteLookupTableSAA1099; break;
 		case CHANID_6581_CH1: case CHANID_6581_CH2: case CHANID_6581_CH3:
 			Table = m_iNoteLookupTableSID; break;
+		case CHANID_MMC5_VOICE:
+			Table = m_iNoteLookupTablePCM; break;
 		default: continue;
 		}
 		m_pChannels[i]->SetNoteTable(Table);
@@ -2373,6 +2379,8 @@ void CSoundGen::ReadPatternRow()
 		if (m_pTrackerView->PlayerGetNote(m_iPlayTrack, m_iPlayFrame, i, m_iPlayRow, NoteData)
 			|| (i >= m_pDocument->GetChannelIndex(CHANID_6581_CH1) && i <= m_pDocument->GetChannelIndex(CHANID_6581_CH3)))
 			QueueNote(i, NoteData, NOTE_PRIO_1);
+		if (i >= m_pDocument->GetChannelIndex(CHANID_SAA1099_CH1) && i <= m_pDocument->GetChannelIndex(CHANID_SAA1099_CH6))
+			QueueNote(i, NoteData, NOTE_PRIO_2);
 	}
 	if (m_bDoHalt) {		// // //
 		m_bHaltRequest = true;

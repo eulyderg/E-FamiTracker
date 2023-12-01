@@ -32,7 +32,7 @@
 #include "DSampleManager.h"
 
 const int CInstrumentManager::MAX_INSTRUMENTS = 64;
-const int CInstrumentManager::SEQ_MANAGER_COUNT = 5;
+const int CInstrumentManager::SEQ_MANAGER_COUNT = 6;
 
 CInstrumentManager::CInstrumentManager(CFTMComponentInterface *pInterface) :
 	m_pDSampleManager(new CDSampleManager()),
@@ -108,7 +108,7 @@ void CInstrumentManager::ClearAll()
 	}
 	for (int i = 0; i < SEQ_MANAGER_COUNT; i++)
 		m_pSequenceManager[i].reset(new CSequenceManager(i == 2 ? 3 : SEQ_COUNT));
-	//m_pSequenceManager[i].reset(new CSequenceManager(SEQ_COUNTS[i]));
+	  //m_pSequenceManager[i].reset(new CSequenceManager(SEQ_COUNTS[i]));
 	m_pDSampleManager.reset(new CDSampleManager());
 }
 
@@ -177,6 +177,7 @@ CSequenceManager *const CInstrumentManager::GetSequenceManager(int InstType) con
 	case INST_FDS:  Index = 2; break;
 	case INST_N163: Index = 3; break;
 	case INST_S5B:  Index = 4; break;
+	case INST_SID:  Index = 5; break;
 	default: return nullptr;
 	}
 	return m_pSequenceManager[Index].get();

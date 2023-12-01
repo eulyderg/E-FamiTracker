@@ -221,6 +221,7 @@ void CInstrumentEditDlg::SetCurrentInstrument(int Index)
 				break;
 			case INST_SID:
 				InsertPane(new CInstrumentEditorSID(), true);
+				InsertPane(new CInstrumentEditorSeq(NULL, _T("Macros"), CInstrumentSID::SEQUENCE_NAME, 15, 15, INST_SID), false);
 				break;
 		}
 

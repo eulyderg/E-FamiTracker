@@ -53,3 +53,25 @@ protected:
 	int  m_iLengthCounter;		// // //
 	int	 m_iLastPeriod;			// // // moved to subclass
 };
+
+
+class CChannelHandlerMMC5Voice : public CChannelHandler {
+public:
+	CChannelHandlerMMC5Voice();
+	void	ResetChannel() override;
+	void	RefreshChannel() override;
+protected:
+	static const char MAX_DUTY;
+
+	void  HandleNoteData(stChanNote* pNoteData, int EffColumns);
+	bool	HandleEffect(effect_t EffNum, unsigned char EffParam) override;		// // //
+	void	HandleEmptyNote() override;
+	void	HandleCut() override;
+	void	HandleRelease() override;
+	bool	CreateInstHandler(inst_type_t Type) override;		// // //
+	void	ClearRegisters() override;
+	CString	GetCustomEffectString() const override;		// // //
+
+protected:
+	uint8_t m_iDAC;
+};

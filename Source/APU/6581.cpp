@@ -24,6 +24,7 @@
 #include "../Common.h"
 #include <algorithm>  // std::min
 #include "APU.h"
+#include "Mixer.h"
 #include "6581.h"
 #include "../RegisterState.h"		// // //
 #include "utils/variadic_minmax.h"
@@ -45,9 +46,9 @@ void C6581::Reset()
 	m_Sid.reset();
 	Synth6581.clear();
 
-	m_Sid.setSamplingParameters(CAPU::BASE_FREQ_NTSC, SamplingMethod::DECIMATE, 44100, 44100);
+	m_Sid.setSamplingParameters(CAPU::BASE_FREQ_C64_NTSC, SamplingMethod::DECIMATE, 44100, 44100);
 	m_Sid.setFilter6581Curve(0.875);
-	m_Sid.setChipModel(MOS6581);
+	m_Sid.setChipModel(MOS8580);
 	m_Sid.enableFilter(true);
 
 }
@@ -65,7 +66,11 @@ void C6581::Process(uint32_t Time, Blip_Buffer& Output)
 		short buf = {};
 		m_Sid.clock(dclocks, &buf);
 
-		Synth6581.update(m_iTime + now, m_Sid.output(), &blip_buf);
+
+		m_Sid.
+		m_Sid.externalFilter->clock((unsigned short)(m_iInput));
+
+		Synth6581.update(m_iTime + now, (int)(m_Sid.output()*0.25), &blip_buf);
 		// channel levels
 		m_ChannelLevels[0].update((uint8_t)((m_Sid.voice[0]->output(m_Sid.voice[2]->wave()) + 2048 * 255) / 8192));
 		m_ChannelLevels[1].update((uint8_t)((m_Sid.voice[1]->output(m_Sid.voice[0]->wave()) + 2048 * 255) / 8192));
@@ -77,7 +82,7 @@ void C6581::Process(uint32_t Time, Blip_Buffer& Output)
 		// the result of `Tick(clocks); Render()` should be sent to Blip_Synth
 		// at the instant in time *before* Tick() is called.
 		// See https://docs.google.com/document/d/1BnXwR3Avol7S5YNa3d4duGdbI6GNMwuYWLHuYiMZh5Y/edit#heading=h.lnh9d8j1x3uc
-		auto dclocks = 1;//Time - now;
+		auto dclocks = 6;//Time - now;
 		get_output(dclocks, now, Output);
 		now += dclocks;
 	}
@@ -138,3 +143,6 @@ void C6581::UpdateMix(double v) {
 	Synth6581.volume(v, 10000);
 }
 
+void C6581::SetInput(int x) {
+	m_iInput = x;
+}

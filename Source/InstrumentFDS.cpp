@@ -57,8 +57,8 @@ CInstrumentFDS::CInstrumentFDS() : CSeqInstrument(INST_FDS),		// // //
 	m_iModulation()
 {
 	memcpy(m_iSamples, TEST_WAVE, WAVE_SIZE);	
-	m_pSequence.resize(SEQ_COUNT);
-	for (int i = 0; i < SEQ_COUNT; ++i)
+	m_pSequence.resize(SEQUENCE_COUNT);
+	for (int i = 0; i < SEQUENCE_COUNT; ++i)
 		m_pSequence[i].reset(new CSequence());
 }
 

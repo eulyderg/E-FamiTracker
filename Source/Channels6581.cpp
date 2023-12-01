@@ -91,11 +91,11 @@ bool CChannelHandler6581::HandleEffect(effect_t EffNum, unsigned char EffParam)
 		break;
 	}
 	case EF_SID_FILTER_CUTOFF_HI: {
-		s_iFilterCutoff = (s_iFilterCutoff & 0xFF) | ((EffParam & 0xF) << 8);
+		s_iFilterCutoff = (s_iFilterCutoff & 0xFF0) | ((EffParam & 0xF));
 		break;
 	}
 	case EF_SID_FILTER_CUTOFF_LO: {
-		s_iFilterCutoff = (s_iFilterCutoff & 0xF00) | (EffParam & 0xFF);
+		s_iFilterCutoff = (s_iFilterCutoff & 0xF) | ((EffParam & 0xFF) << 4);
 		break;
 	}
 	case EF_SID_FILTER_MODE: {
@@ -105,6 +105,27 @@ bool CChannelHandler6581::HandleEffect(effect_t EffNum, unsigned char EffParam)
 			s_iFilterEnable |= (1U << (m_iChannelID - CHANID_6581_CH1));
 			s_iFilterMode = EffParam & 0xF;
 		}
+		break;
+	}
+	case EF_SID_ENVELOPE: {
+		switch (EffParam >> 4) {
+		case 0:
+			m_iEnvAD = (m_iEnvAD & 0x0F) | ((EffParam & 0x0F) << 4);
+		case 1:
+			m_iEnvAD = (m_iEnvAD & 0xF0) | (EffParam & 0x0F);
+		case 2:
+			m_iEnvSR = (m_iEnvSR & 0x0F) | ((EffParam & 0x0F) << 4);
+		case 3:
+			m_iEnvSR = (m_iEnvSR & 0xF0) | (EffParam & 0x0F);
+		}
+		s_iFilterCutoff = (s_iFilterCutoff & 0xF) | ((EffParam & 0xFF) << 4);
+		break;
+	}
+	case EF_SID_RING: {
+		m_iTestBit = (EffParam & 0b1000) >> 3;
+		m_iRingBit = (EffParam & 0b0100) >> 2;
+		m_iSyncBit = (EffParam & 0b0010) >> 1;
+		m_iGateBit = (EffParam & 0b0001) >> 0;
 		break;
 	}
 	default: return CChannelHandler::HandleEffect(EffNum, EffParam);
@@ -131,11 +152,11 @@ void CChannelHandler6581::HandleNoteData(stChanNote* pNoteData, int EffColumns)
 {
 	CChannelHandler::HandleNoteData(pNoteData, EffColumns);
 	if (pNoteData->Note != 0 && pNoteData->Note != RELEASE && pNoteData->Note != HALT)
-		m_iGateCounter = (pNoteData->Instrument != HOLD_INSTRUMENT) ? 1 : 3;
+		m_iGateCounter = 1;//((pNoteData->Instrument != HOLD_INSTRUMENT && pNoteData->Instrument != RELEASE_INSTRUMENT && pNoteData->Instrument != CUT_INSTRUMENT) || m_iGateBit == 0) ? 1 : 3;
 
-	if (pNoteData->Vol < MAX_VOLUME) {
-		s_iGlobalVolume = pNoteData->Vol & 15;
-	}
+	//if (pNoteData->Vol < MAX_VOLUME) {
+	//	s_iGlobalVolume = pNoteData->Vol & 15;
+	//}
 }
 
 
@@ -187,7 +208,7 @@ void CChannelHandler6581::ResetChannel()
 	CChannelHandler::ResetChannel();
 
 	m_iDefaultDuty = m_iDutyPeriod = 4;
-	m_iPulseWidth = 0;
+	m_iPulseWidth = 0x800;
 	m_iGateBit = 0;
 	m_iTestBit = 0;
 	m_iGateCounter = 0;
@@ -198,6 +219,7 @@ void CChannelHandler6581::ResetChannel()
 	s_iFilterEnable = 0;
 	m_iEnvAD = 0;
 	m_iEnvSR = 0;
+	m_iCurVol = m_iVolume;
 	SetLinearPitch(true);
 }
 
@@ -257,8 +279,13 @@ void CChannelHandler6581::RefreshChannel()
 	WriteReg(0x05 + Offset, m_iEnvAD);
 	WriteReg(0x06 + Offset, m_iEnvSR);
 
+	//if (m_iCurVol != m_iInstVolume && m_iInstVolume < MAX_VOLUME) {
+	//	m_iCurVol = m_iInstVolume;
+	//	s_iGlobalVolume = m_iInstVolume;
+	//}
+
 	if (m_iGateCounter > 0) {
-		if (m_iGateCounter < 2) {
+		if (m_iGateCounter < 3) {
 			m_iGateCounter++;
 			m_iGateBit = 0;
 			WriteReg(0x05 + Offset, 0x00);
@@ -271,15 +298,15 @@ void CChannelHandler6581::RefreshChannel()
 
 
 	unsigned char Waveform = (m_iDutyPeriod & 15) << 4;
-	Waveform |= m_iGateBit | (m_iTestBit << 1);
+	Waveform |= m_iGateBit | (m_iSyncBit << 1) | (m_iRingBit << 2) | (m_iTestBit << 3);
 
 	WriteReg(0x00 + Offset, LoFreq);
 	WriteReg(0x01 + Offset, HiFreq);
 	WriteReg(0x02 + Offset, LoPW);
 	WriteReg(0x03 + Offset, HiPW);
 	WriteReg(0x04 + Offset, Waveform);
-	WriteReg(0x15, (s_iFilterCutoff & 0xF00) >> 8);
-	WriteReg(0x16, s_iFilterCutoff & 0x0FF);
+	WriteReg(0x15, (s_iFilterCutoff & 0xF));
+	WriteReg(0x16, (s_iFilterCutoff & 0xFF0) >> 4);
 	WriteReg(0x17, (s_iFilterResonance << 4) | s_iFilterEnable);
 	WriteReg(0x18, (s_iFilterMode << 4) | s_iGlobalVolume);
 
@@ -294,6 +321,11 @@ void CChannelHandler6581::SetADSR(unsigned char EnvAD, unsigned char EnvSR)
 void CChannelHandler6581::SetPulseWidth(unsigned int PulseWidth)
 {
 	m_iPulseWidth = PulseWidth;
+}
+
+void CChannelHandler6581::SetFilterCutoff(unsigned int FilterCutoff)
+{
+	s_iFilterCutoff = FilterCutoff;
 }
 
 unsigned int CChannelHandler6581::GetPulseWidth() const

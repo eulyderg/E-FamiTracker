@@ -48,6 +48,7 @@ public:
 
 public:
 	void UpdateMix(double v);
+	void SetInput(int x);
 
 private:
 
@@ -59,4 +60,6 @@ private:
 	Blip_Synth<blip_good_quality> Synth6581;
 
 	uint32_t	m_iTime = 0;  // Clock counter, used as a timestamp for Blip_Buffer, resets every new frame
+
+	int m_iInput = 0;
 };

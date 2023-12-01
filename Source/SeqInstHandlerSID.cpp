@@ -56,6 +56,19 @@ void CSeqInstHandlerSID::TriggerInstrument()
 		m_pPWMMode = pSIDInst.get()->GetPWMMode();
 		m_pPWMDirection = m_pPWMEnd > m_pPWMStart ? 1 : -1;
 	}
+	if (pSIDInst.get()->GetFilterMode() != PWM_SUSTAIN) {
+		m_pFilterValue = pSIDInst.get()->GetFilterStart();
+		m_pFilterStart = pSIDInst.get()->GetFilterStart();
+		m_pFilterEnd = pSIDInst.get()->GetFilterEnd();
+		m_pFilterSpeed = pSIDInst.get()->GetFilterSpeed();
+		m_pFilterMode = pSIDInst.get()->GetFilterMode();
+		//m_pFilterPass= pSIDInst.get()->GetFilterPass();
+		m_pFilterDirection = m_pFilterEnd > m_pFilterStart ? 1 : -1;
+	}
+	pInterface->SetADSR(
+		(pSIDInst->GetEnvParam(ENV_ATTACK) << 4) | pSIDInst->GetEnvParam(ENV_DECAY),
+		(pSIDInst->GetEnvParam(ENV_SUSTAIN) << 4) | pSIDInst->GetEnvParam(ENV_RELEASE)
+	);
 	UpdateTables(pSIDInst.get());
 
 }
@@ -73,10 +86,6 @@ void CSeqInstHandlerSID::UpdateTables(const CInstrumentSID* pInst)
 {
 	auto* pInterface = dynamic_cast<CChannelHandlerInterfaceSID*>(m_pInterface);
 	if (pInterface == nullptr) return;
-	pInterface->SetADSR(
-		(pInst->GetEnvParam(ENV_ATTACK) << 4) | pInst->GetEnvParam(ENV_DECAY),
-		(pInst->GetEnvParam(ENV_SUSTAIN) << 4) | pInst->GetEnvParam(ENV_RELEASE)
-	);
 	if (m_pPWMMode != PWM_DISABLED)
 		pInterface->SetPulseWidth(m_pPWMValue);
 	m_pPWMValue += m_pPWMDirection * m_pPWMSpeed;
@@ -97,6 +106,31 @@ void CSeqInstHandlerSID::UpdateTables(const CInstrumentSID* pInst)
 		if ((m_pPWMValue > m_pPWMEnd && m_pPWMDirection > 0) || (m_pPWMValue < m_pPWMEnd && m_pPWMDirection < 0)) {
 			m_pPWMValue = m_pPWMEnd;
 			m_pPWMSpeed = 0;
+		}
+	}
+	if (m_pFilterMode != PWM_DISABLED) {
+		pInterface->SetFilterCutoff(m_pFilterValue);
+	}
+	m_pFilterValue += m_pFilterDirection * m_pFilterSpeed;
+	if (m_pFilterMode == PWM_LOOP) {
+		if ((m_pFilterValue > m_pFilterEnd && m_pFilterDirection > 0) || (m_pFilterValue < m_pFilterEnd && m_pFilterDirection < 0)) {
+			m_pFilterValue = m_pFilterStart;
+		}
+	}
+	else if (m_pFilterMode == PWM_PINGPONG) {
+		if ((m_pFilterValue > m_pFilterEnd && m_pFilterDirection > 0) || (m_pFilterValue < m_pFilterEnd && m_pFilterDirection < 0)) {
+			m_pFilterValue = m_pFilterEnd;
+			m_pFilterSpeed *= -1;
+		}
+		else if ((m_pFilterValue < m_pFilterStart && m_pFilterDirection > 0) || (m_pFilterValue > m_pFilterStart && m_pFilterDirection < 0)) {
+			m_pFilterValue = m_pFilterStart;
+			m_pFilterSpeed *= -1;
+		}
+	}
+	else if (m_pFilterMode == PWM_ONCE) {
+		if ((m_pFilterValue > m_pFilterEnd && m_pFilterDirection > 0) || (m_pFilterValue < m_pFilterEnd && m_pFilterDirection < 0)) {
+			m_pFilterValue = m_pFilterEnd;
+			m_pFilterSpeed = 0;
 		}
 	}
 }

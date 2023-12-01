@@ -41,11 +41,20 @@ public:
 	void LengthCounterUpdate();
 	void EnvelopeUpdate();
 	void ClockSequence();		// // //
+	
+	int m_iValue = 0;
 
 private:	
 	CSquare	*m_pSquare1;
 	CSquare	*m_pSquare2;
+
 	uint8_t	*m_pEXRAM;
 	uint8_t	m_iMulLow;
 	uint8_t	m_iMulHigh;
+
+	uint8_t m_iDAC;
+	bool m_bDACMode;
+	uint32_t m_iTime;
+
+	int		m_iLastDACValue;
 };

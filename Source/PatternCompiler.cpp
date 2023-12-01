@@ -120,6 +120,8 @@ enum command_t {
 	CMD_EFF_SID_FILTER_CUTOFF_HI,
 	CMD_EFF_SID_FILTER_CUTOFF_LO,
 	CMD_EFF_SID_FILTER_MODE,
+	CMD_EFF_SID_ENVELOPE,
+	CMD_EFF_SID_RING,
 
 	CMD_EFF_PWM,
 	CMD_EFF_VOLUME_OFFSET,
@@ -177,6 +179,7 @@ void CPatternCompiler::CompileData(int Track, int Pattern, int Channel)
 		int ChipID = pTrackerChannel->GetChip();
 
 		if (ChanNote.Instrument != MAX_INSTRUMENTS && ChanNote.Instrument != HOLD_INSTRUMENT &&
+			ChanNote.Instrument != CUT_INSTRUMENT && ChanNote.Instrument != RELEASE_INSTRUMENT &&
 			Note != HALT && Note != NONE && Note != RELEASE) {		// // //
 			if (!pTrackerChannel->IsInstrumentCompatible(ChanNote.Instrument,
 				m_pDocument->GetInstrumentType(ChanNote.Instrument))) {		// // //
@@ -485,6 +488,10 @@ void CPatternCompiler::CompileData(int Track, int Pattern, int Channel)
 						WriteData(Command(CMD_EFF_DAC));
 						WriteData(EffParam & 0x7F);
 					}
+					else if (ChanID == CHANID_MMC5_VOICE) {
+						WriteData(Command(CMD_EFF_DAC));
+						WriteData(EffParam & 0xFF);
+					}
 					break;
 				case EF_DUTY_CYCLE:
 					if (ChipID == SNDCHIP_VRC7) {		// // // 050B
@@ -701,6 +708,18 @@ void CPatternCompiler::CompileData(int Track, int Pattern, int Channel)
 						WriteData(EffParam & 0x0F);
 					}
 					break;
+				case EF_SID_ENVELOPE:		// // // 050B
+					if (ChipID == SNDCHIP_6581) {
+						WriteData(Command(CMD_EFF_SID_ENVELOPE));
+						WriteData(EffParam & 0x0F);
+					}
+					break;
+				case EF_SID_RING:		// // // 050B
+					if (ChipID == SNDCHIP_6581) {
+						WriteData(Command(CMD_EFF_SID_RING));
+						WriteData(EffParam & 0x0F);
+					}
+					break;
 				// // // N163
 				case EF_N163_WAVE_BUFFER:
 					if (ChipID == SNDCHIP_N163 && EffParam <= 0x7F) {
@@ -773,6 +792,10 @@ unsigned int CPatternCompiler::FindInstrument(int Instrument) const
 		return MAX_INSTRUMENTS;
 	if (Instrument == HOLD_INSTRUMENT)		// // // 050B
 		return HOLD_INSTRUMENT;
+	if (Instrument == CUT_INSTRUMENT)		// // // 050B
+		return CUT_INSTRUMENT;
+	if (Instrument == RELEASE_INSTRUMENT)		// // // 050B
+		return RELEASE_INSTRUMENT;
 
 	for (int i = 0; i < MAX_INSTRUMENTS; i++) {
 		if (m_pInstrumentList[i] == Instrument)
@@ -801,7 +824,7 @@ void CPatternCompiler::ScanNoteLengths(stSpacingInfo &Info, int Track, unsigned 
 
 		if (NoteData.Note > 0)
 			NoteUsed = true;
-		else if (NoteData.Instrument < MAX_INSTRUMENTS || NoteData.Instrument == HOLD_INSTRUMENT)		// // //
+		else if (NoteData.Instrument < MAX_INSTRUMENTS || NoteData.Instrument == HOLD_INSTRUMENT || NoteData.Instrument == CUT_INSTRUMENT || NoteData.Instrument == RELEASE_INSTRUMENT)		// // //
 			NoteUsed = true;
 		else if (NoteData.Vol < MAX_VOLUME)
 			NoteUsed = true;

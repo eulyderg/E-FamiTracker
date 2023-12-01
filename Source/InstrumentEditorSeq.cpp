@@ -43,15 +43,16 @@ const inst_type_t CInstrumentEditorSeq::INST_TYPE = INST_NONE;
 */
 
 IMPLEMENT_DYNAMIC(CInstrumentEditorSeq, CSequenceInstrumentEditPanel)
-CInstrumentEditorSeq::CInstrumentEditorSeq(CWnd* pParent, TCHAR *Title, LPCTSTR *SeqName, int Vol, int Duty, inst_type_t Type) :
+CInstrumentEditorSeq::CInstrumentEditorSeq(CWnd* pParent, TCHAR* Title, LPCTSTR* SeqName, int Vol, int Duty, inst_type_t Type) :
 	CSequenceInstrumentEditPanel(CInstrumentEditorSeq::IDD, pParent),
 	m_pTitle(Title),
 	m_pSequenceName(SeqName),
-	m_pSequenceCount(SEQ_COUNT),
+	m_pSequenceCount(5),
 	m_iMaxVolume(Vol),
 	m_iMaxDuty(Duty),
 	m_iInstType(Type)
 {
+	//m_pSequenceCount = (Type == INST_SID) ? 6 : 5;
 }
 
 void CInstrumentEditorSeq::SelectInstrument(std::shared_ptr<CInstrument> pInst)
@@ -65,7 +66,7 @@ void CInstrumentEditorSeq::SelectInstrument(std::shared_ptr<CInstrument> pInst)
 	if (CListCtrl *pList = static_cast<CListCtrl*>(GetDlgItem(IDC_INSTSETTINGS))) {		// // //
 		pList->SetRedraw(FALSE);
 		CString str;
-		for (int i = 0; i < SEQ_COUNT; ++i) {
+		for (int i = 0; i < m_pSequenceCount; ++i) {
 			pList->SetCheck(i, m_pInstrument->GetSeqEnable(i));
 			str.Format(_T("%i"), m_pInstrument->GetSeqIndex(i));
 			pList->SetItemText(i, 1, str);
@@ -153,7 +154,7 @@ BOOL CInstrumentEditorSeq::OnInitDialog()
 {
 	CInstrumentEditPanel::OnInitDialog();
 
-	SetupDialog(m_pSequenceName);
+	SetupDialog(m_pSequenceName, m_pSequenceCount);
 	m_pSequenceEditor->SetMaxValues(m_iMaxVolume, m_iMaxDuty);
 
 	return TRUE;  // return TRUE unless you set the focus to a control

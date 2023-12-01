@@ -38,6 +38,12 @@ const int MAX_INSTRUMENTS = 64;
 const int HOLD_INSTRUMENT = 0xFF;		// // // 050B
 // TODO: check if this conflicts with INVALID_INSTRUMENT
 
+// Cut instrument index
+const int CUT_INSTRUMENT = 0xFE;		// // //
+
+// Release instrument index
+const int RELEASE_INSTRUMENT = 0xFD;		// // //
+
 // Maximum number of sequence lists
 const int MAX_SEQUENCES	= 128;
 
@@ -182,6 +188,8 @@ enum effect_t : unsigned char {
 	EF_SID_FILTER_CUTOFF_HI, // // // SID filter cutoff hi
 	EF_SID_FILTER_CUTOFF_LO, // // // SID filter cutoff lo
 	EF_SID_FILTER_MODE, // // // SID filter mode
+	EF_SID_ENVELOPE,    // // // SID envelope parameters
+	EF_SID_RING,        // // // SID ringmod
 
 	EF_COUNT
 };
@@ -198,7 +206,7 @@ const effect_t N163_EFFECTS[] = {EF_N163_WAVE_BUFFER};
 const effect_t S5B_EFFECTS[] = { EF_SUNSOFT_ENV_TYPE, EF_SUNSOFT_ENV_HI, EF_SUNSOFT_ENV_LO, EF_SUNSOFT_NOISE };
 const effect_t AY8930_EFFECTS[] = {EF_SUNSOFT_ENV_TYPE, EF_SUNSOFT_ENV_HI, EF_SUNSOFT_ENV_LO, EF_SUNSOFT_NOISE, EF_AY8930_PULSE_WIDTH, EF_AY8930_AND_MASK, EF_AY8930_OR_MASK, EF_AY8930_VOL};
 const effect_t SAA1099_EFFECTS[] = {EF_SUNSOFT_ENV_TYPE, EF_SAA_NOISE_MODE};
-const effect_t SID_EFFECTS[] = { EF_AY8930_PULSE_WIDTH, EF_SID_FILTER_RESONANCE, EF_SID_FILTER_CUTOFF_HI, EF_SID_FILTER_CUTOFF_LO, EF_SID_FILTER_MODE };
+const effect_t SID_EFFECTS[] = { EF_AY8930_PULSE_WIDTH, EF_SID_FILTER_RESONANCE, EF_SID_FILTER_CUTOFF_HI, EF_SID_FILTER_CUTOFF_LO, EF_SID_FILTER_MODE, EF_SID_ENVELOPE, EF_SID_RING };
 
 // Effect checking = bool CTrackerChannel::IsEffectCompatible
 
@@ -259,6 +267,8 @@ const char EFF_CHAR[] = {
 	'I',  // EF_SID_FILTER_CUTOFF_HI
 	'J',  // EF_SID_FILTER_CUTOFF_LO
 	'H',  // EF_SID_FILTER_MODE
+	'E',  // EF_SID_ENVELOPE
+	'Y',  // EF_SID_RING
 };
 
 struct Effect {

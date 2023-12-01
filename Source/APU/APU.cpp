@@ -46,6 +46,7 @@
 const int		CAPU::SEQUENCER_FREQUENCY	= 240;		// // //
 const uint32_t	CAPU::BASE_FREQ_NTSC		= 1789773;		// 72.667
 const uint32_t	CAPU::BASE_FREQ_PAL			= 1662607;
+const uint32_t  CAPU::BASE_FREQ_C64_NTSC = 10227273;
 const uint8_t	CAPU::FRAME_RATE_NTSC		= 60;
 const uint8_t	CAPU::FRAME_RATE_PAL		= 50;
 
@@ -118,10 +119,14 @@ void CAPU::Process()
 		Time = std::min(Time, m_iSequencerNext - m_iSequencerClock);		// // //
 		Time = std::min(Time, m_iFrameClock);
 
-		for (auto Chip : m_SoundChips)		// // //
+		for (auto Chip : m_SoundChips) {		// // //
 			Chip->Process(Time);
+		}
+		m_p6581->SetInput(m_pMMC5->m_iValue);
 		for (auto Chip : m_SoundChips2)
 			Chip->Process(Time, m_pMixer->GetBuffer());
+
+
 
 		m_iFrameCycles	  += Time;
 		m_iSequencerClock += Time;
